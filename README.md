@@ -8048,6 +8048,3733 @@ int** levelOrderBottom(struct TreeNode* root, int* returnSize, int** returnColum
     return result;
 }
 
+61)
+
+a) #include <stdio.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+// Initialize graph
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+// Add edge (undirected)
+void addEdgeUndirected(Graph* g, int u, int v) {
+    if(u >= 0 && u < g->vertices && v >= 0 && v < g->vertices) {
+        g->adjMatrix[u][v] = 1;
+        g->adjMatrix[v][u] = 1;
+    }
+}
+
+// Add edge (directed)
+void addEdgeDirected(Graph* g, int u, int v) {
+    if(u >= 0 && u < g->vertices && v >= 0 && v < g->vertices) {
+        g->adjMatrix[u][v] = 1;
+    }
+}
+
+// Remove edge
+void removeEdge(Graph* g, int u, int v) {
+    if(u >= 0 && u < g->vertices && v >= 0 && v < g->vertices) {
+        g->adjMatrix[u][v] = 0;
+        g->adjMatrix[v][u] = 0;
+    }
+}
+
+// Check if edge exists
+bool hasEdge(Graph* g, int u, int v) {
+    return g->adjMatrix[u][v] == 1;
+}
+
+// Get degree of vertex (for undirected graph)
+int getDegree(Graph* g, int vertex) {
+    int degree = 0;
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[vertex][i] == 1) {
+            degree++;
+        }
+    }
+    return degree;
+}
+
+// Print adjacency matrix
+void printGraph(Graph* g) {
+    printf("Adjacency Matrix:\n   ");
+    for(int i = 0; i < g->vertices; i++) {
+        printf("%2d ", i);
+    }
+    printf("\n");
+    
+    for(int i = 0; i < g->vertices; i++) {
+        printf("%2d ", i);
+        for(int j = 0; j < g->vertices; j++) {
+            printf("%2d ", g->adjMatrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, choice, u, v;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("\nChoose graph type:\n");
+    printf("1. Undirected\n");
+    printf("2. Directed\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        
+        if(choice == 1) {
+            addEdgeUndirected(&g, u, v);
+        } else {
+            addEdgeDirected(&g, u, v);
+        }
+    }
+    
+    printGraph(&g);
+    
+    printf("\nDegree of vertices:\n");
+    for(int i = 0; i < vertices; i++) {
+        printf("Vertex %d: %d\n", i, getDegree(&g, i));
+    }
+    
+    return 0;
+}
+
+b) void dfs(int** isConnected, int n, int city, int* visited) {
+    visited[city] = 1;
+    
+    for(int i = 0; i < n; i++) {
+        if(isConnected[city][i] == 1 && !visited[i]) {
+            dfs(isConnected, n, i, visited);
+        }
+    }
+}
+
+int findCircleNum(int** isConnected, int isConnectedSize, int* isConnectedColSize) {
+    int n = isConnectedSize;
+    int* visited = (int*)calloc(n, sizeof(int));
+    int provinces = 0;
+    
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            dfs(isConnected, n, i, visited);
+            provinces++;
+        }
+    }
+    
+    free(visited);
+    return provinces;
+}
+
+62)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+// Node in adjacency list
+struct AdjListNode {
+    int dest;
+    int weight;  // For weighted graphs
+    struct AdjListNode* next;
+};
+
+// Adjacency list for a vertex
+struct AdjList {
+    struct AdjListNode* head;
+};
+
+// Graph structure
+typedef struct {
+    int vertices;
+    struct AdjList array[MAX];
+    int isWeighted;
+} Graph;
+
+// Create a new adjacency list node
+struct AdjListNode* createNode(int dest, int weight) {
+    struct AdjListNode* newNode = (struct AdjListNode*)malloc(sizeof(struct AdjListNode));
+    newNode->dest = dest;
+    newNode->weight = weight;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Initialize graph
+void initGraph(Graph* g, int vertices, int isWeighted) {
+    g->vertices = vertices;
+    g->isWeighted = isWeighted;
+    for(int i = 0; i < vertices; i++) {
+        g->array[i].head = NULL;
+    }
+}
+
+// Add edge (undirected)
+void addEdgeUndirected(Graph* g, int src, int dest, int weight) {
+    // Add edge src -> dest
+    struct AdjListNode* newNode = createNode(dest, weight);
+    newNode->next = g->array[src].head;
+    g->array[src].head = newNode;
+    
+    // Add edge dest -> src (for undirected)
+    newNode = createNode(src, weight);
+    newNode->next = g->array[dest].head;
+    g->array[dest].head = newNode;
+}
+
+// Add edge (directed)
+void addEdgeDirected(Graph* g, int src, int dest, int weight) {
+    struct AdjListNode* newNode = createNode(dest, weight);
+    newNode->next = g->array[src].head;
+    g->array[src].head = newNode;
+}
+
+// Print adjacency list
+void printGraph(Graph* g) {
+    printf("Adjacency List:\n");
+    for(int i = 0; i < g->vertices; i++) {
+        printf("Vertex %d: ", i);
+        struct AdjListNode* current = g->array[i].head;
+        while(current != NULL) {
+            if(g->isWeighted) {
+                printf("-> (%d, w=%d) ", current->dest, current->weight);
+            } else {
+                printf("-> %d ", current->dest);
+            }
+            current = current->next;
+        }
+        printf("-> NULL\n");
+    }
+}
+
+// Get degree of vertex
+int getDegree(Graph* g, int vertex) {
+    int degree = 0;
+    struct AdjListNode* current = g->array[vertex].head;
+    while(current != NULL) {
+        degree++;
+        current = current->next;
+    }
+    return degree;
+}
+
+// BFS traversal using adjacency list
+void bfs(Graph* g, int start) {
+    bool visited[MAX] = {false};
+    int queue[MAX], front = 0, rear = 0;
+    
+    visited[start] = true;
+    queue[rear++] = start;
+    
+    printf("BFS Traversal starting from %d: ", start);
+    
+    while(front < rear) {
+        int current = queue[front++];
+        printf("%d ", current);
+        
+        struct AdjListNode* neighbor = g->array[current].head;
+        while(neighbor != NULL) {
+            if(!visited[neighbor->dest]) {
+                visited[neighbor->dest] = true;
+                queue[rear++] = neighbor->dest;
+            }
+            neighbor = neighbor->next;
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, choice, src, dest, weight;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    
+    printf("Choose graph type:\n");
+    printf("1. Unweighted\n");
+    printf("2. Weighted\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    initGraph(&g, vertices, (choice == 2));
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    printf("Choose edge direction:\n");
+    printf("1. Undirected\n");
+    printf("2. Directed\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    for(int i = 0; i < edges; i++) {
+        if(g.isWeighted) {
+            printf("Edge %d (src dest weight): ", i + 1);
+            scanf("%d %d %d", &src, &dest, &weight);
+        } else {
+            printf("Edge %d (src dest): ", i + 1);
+            scanf("%d %d", &src, &dest);
+            weight = 1;
+        }
+        
+        if(choice == 1) {
+            addEdgeUndirected(&g, src, dest, weight);
+        } else {
+            addEdgeDirected(&g, src, dest, weight);
+        }
+    }
+    
+    printGraph(&g);
+    
+    printf("\nDegrees:\n");
+    for(int i = 0; i < vertices; i++) {
+        printf("Vertex %d: %d\n", i, getDegree(&g, i));
+    }
+    
+    bfs(&g, 0);
+    
+    return 0;
+}
+
+b) void dfs(int** rooms, int* roomsColSize, int room, int* visited, int n) {
+    visited[room] = 1;
+    
+    for(int i = 0; i < roomsColSize[room]; i++) {
+        int key = rooms[room][i];
+        if(!visited[key]) {
+            dfs(rooms, roomsColSize, key, visited, n);
+        }
+    }
+}
+
+bool canVisitAllRooms(int** rooms, int roomsSize, int* roomsColSize) {
+    int* visited = (int*)calloc(roomsSize, sizeof(int));
+    
+    dfs(rooms, roomsColSize, 0, visited, roomsSize);
+    
+    for(int i = 0; i < roomsSize; i++) {
+        if(!visited[i]) {
+            free(visited);
+            return false;
+        }
+    }
+    
+    free(visited);
+    return true;
+}
+
+63)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->adjMatrix[u][v] = 1;
+    g->adjMatrix[v][u] = 1;
+}
+
+// Recursive DFS
+void dfsRecursive(Graph* g, int vertex, bool* visited) {
+    visited[vertex] = true;
+    printf("%d ", vertex);
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+            dfsRecursive(g, i, visited);
+        }
+    }
+}
+
+// Iterative DFS using stack
+void dfsIterative(Graph* g, int start) {
+    bool visited[MAX] = {false};
+    int stack[MAX];
+    int top = -1;
+    
+    stack[++top] = start;
+    
+    printf("DFS (Iterative): ");
+    
+    while(top >= 0) {
+        int vertex = stack[top--];
+        
+        if(!visited[vertex]) {
+            visited[vertex] = true;
+            printf("%d ", vertex);
+            
+            // Push neighbors in reverse order for correct order
+            for(int i = g->vertices - 1; i >= 0; i--) {
+                if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+                    stack[++top] = i;
+                }
+            }
+        }
+    }
+    printf("\n");
+}
+
+// Find connected components using DFS
+void findConnectedComponents(Graph* g) {
+    bool visited[MAX] = {false};
+    int componentCount = 0;
+    
+    printf("Connected Components:\n");
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            componentCount++;
+            printf("Component %d: ", componentCount);
+            dfsRecursive(g, i, visited);
+            printf("\n");
+        }
+    }
+    
+    printf("Total components: %d\n", componentCount);
+}
+
+void printGraph(Graph* g) {
+    printf("Adjacency Matrix:\n");
+    for(int i = 0; i < g->vertices; i++) {
+        for(int j = 0; j < g->vertices; j++) {
+            printf("%d ", g->adjMatrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v, start;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        addEdge(&g, u, v);
+    }
+    
+    printGraph(&g);
+    
+    printf("\nEnter starting vertex for DFS: ");
+    scanf("%d", &start);
+    
+    bool visited[MAX] = {false};
+    printf("DFS (Recursive) from %d: ", start);
+    dfsRecursive(&g, start, visited);
+    printf("\n");
+    
+    dfsIterative(&g, start);
+    
+    findConnectedComponents(&g);
+    
+    return 0;
+}
+
+b) void dfs(int** image, int imageSize, int* imageColSize, int sr, int sc, int originalColor, int newColor) {
+    if(sr < 0 || sr >= imageSize || sc < 0 || sc >= imageColSize[0]) {
+        return;
+    }
+    if(image[sr][sc] != originalColor) {
+        return;
+    }
+    if(image[sr][sc] == newColor) {
+        return;
+    }
+    
+    image[sr][sc] = newColor;
+    
+    dfs(image, imageSize, imageColSize, sr + 1, sc, originalColor, newColor);
+    dfs(image, imageSize, imageColSize, sr - 1, sc, originalColor, newColor);
+    dfs(image, imageSize, imageColSize, sr, sc + 1, originalColor, newColor);
+    dfs(image, imageSize, imageColSize, sr, sc - 1, originalColor, newColor);
+}
+
+int** floodFill(int** image, int imageSize, int* imageColSize, int sr, int sc, int color, int* returnSize, int** returnColumnSizes) {
+    *returnSize = imageSize;
+    *returnColumnSizes = imageColSize;
+    
+    int originalColor = image[sr][sc];
+    if(originalColor != color) {
+        dfs(image, imageSize, imageColSize, sr, sc, originalColor, color);
+    }
+    
+    return image;
+}
+
+64)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->adjMatrix[u][v] = 1;
+    g->adjMatrix[v][u] = 1;
+}
+
+// BFS using queue
+void bfs(Graph* g, int start) {
+    bool visited[MAX] = {false};
+    int queue[MAX];
+    int front = 0, rear = 0;
+    
+    visited[start] = true;
+    queue[rear++] = start;
+    
+    printf("BFS Traversal from %d: ", start);
+    
+    while(front < rear) {
+        int vertex = queue[front++];
+        printf("%d ", vertex);
+        
+        for(int i = 0; i < g->vertices; i++) {
+            if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+                visited[i] = true;
+                queue[rear++] = i;
+            }
+        }
+    }
+    printf("\n");
+}
+
+// BFS to find shortest path (unweighted graph)
+void shortestPath(Graph* g, int start, int target) {
+    bool visited[MAX] = {false};
+    int queue[MAX];
+    int front = 0, rear = 0;
+    int parent[MAX];
+    
+    for(int i = 0; i < g->vertices; i++) {
+        parent[i] = -1;
+    }
+    
+    visited[start] = true;
+    queue[rear++] = start;
+    
+    while(front < rear) {
+        int vertex = queue[front++];
+        
+        if(vertex == target) {
+            break;
+        }
+        
+        for(int i = 0; i < g->vertices; i++) {
+            if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+                visited[i] = true;
+                parent[i] = vertex;
+                queue[rear++] = i;
+            }
+        }
+    }
+    
+    if(!visited[target]) {
+        printf("No path from %d to %d\n", start, target);
+        return;
+    }
+    
+    // Print path
+    int path[MAX], pathLen = 0;
+    int current = target;
+    while(current != -1) {
+        path[pathLen++] = current;
+        current = parent[current];
+    }
+    
+    printf("Shortest path from %d to %d: ", start, target);
+    for(int i = pathLen - 1; i >= 0; i--) {
+        printf("%d ", path[i]);
+    }
+    printf("\n");
+}
+
+// Check if graph is connected using BFS
+bool isConnected(Graph* g) {
+    bool visited[MAX] = {false};
+    int queue[MAX];
+    int front = 0, rear = 0;
+    int count = 0;
+    
+    visited[0] = true;
+    queue[rear++] = 0;
+    
+    while(front < rear) {
+        int vertex = queue[front++];
+        count++;
+        
+        for(int i = 0; i < g->vertices; i++) {
+            if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+                visited[i] = true;
+                queue[rear++] = i;
+            }
+        }
+    }
+    
+    return count == g->vertices;
+}
+
+void printGraph(Graph* g) {
+    printf("Adjacency Matrix:\n");
+    for(int i = 0; i < g->vertices; i++) {
+        for(int j = 0; j < g->vertices; j++) {
+            printf("%d ", g->adjMatrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v, start, target;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        addEdge(&g, u, v);
+    }
+    
+    printGraph(&g);
+    
+    printf("\nEnter starting vertex for BFS: ");
+    scanf("%d", &start);
+    bfs(&g, start);
+    
+    printf("\nEnter source and target for shortest path: ");
+    scanf("%d %d", &start, &target);
+    shortestPath(&g, start, target);
+    
+    if(isConnected(&g)) {
+        printf("\nGraph is connected\n");
+    } else {
+        printf("\nGraph is NOT connected\n");
+    }
+    
+    return 0;
+}
+
+b) #include <stdlib.h>
+#include <limits.h>
+
+int orangesRotting(int** grid, int gridSize, int* gridColSize) {
+    int rows = gridSize;
+    int cols = gridColSize[0];
+    
+    int queue[10000][2];
+    int front = 0, rear = 0;
+    int freshCount = 0;
+    int minutes = 0;
+    
+    // Find all rotten oranges and count fresh ones
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(grid[i][j] == 2) {
+                queue[rear][0] = i;
+                queue[rear][1] = j;
+                rear++;
+            } else if(grid[i][j] == 1) {
+                freshCount++;
+            }
+        }
+    }
+    
+    // If no fresh oranges, return 0
+    if(freshCount == 0) return 0;
+    
+    // Directions: up, down, left, right
+    int dirs[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    
+    while(front < rear && freshCount > 0) {
+        int levelSize = rear - front;
+        minutes++;
+        
+        for(int i = 0; i < levelSize; i++) {
+            int r = queue[front][0];
+            int c = queue[front][1];
+            front++;
+            
+            for(int d = 0; d < 4; d++) {
+                int nr = r + dirs[d][0];
+                int nc = c + dirs[d][1];
+                
+                if(nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] == 1) {
+                    grid[nr][nc] = 2;
+                    freshCount--;
+                    queue[rear][0] = nr;
+                    queue[rear][1] = nc;
+                    rear++;
+                }
+            }
+        }
+    }
+    
+    return (freshCount == 0) ? minutes : -1;
+}
+
+65)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->adjMatrix[u][v] = 1;
+    g->adjMatrix[v][u] = 1;
+}
+
+bool isCyclicUtil(Graph* g, int vertex, bool* visited, int parent) {
+    visited[vertex] = true;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[vertex][i] == 1) {
+            if(!visited[i]) {
+                if(isCyclicUtil(g, i, visited, vertex)) {
+                    return true;
+                }
+            } else if(i != parent) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool hasCycle(Graph* g) {
+    bool visited[MAX] = {false};
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            if(isCyclicUtil(g, i, visited, -1)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Detect cycle in directed graph using 3-state coloring
+bool isCyclicDirectedUtil(Graph* g, int vertex, int* visited) {
+    // 0 = unvisited, 1 = visiting (in recursion stack), 2 = fully processed
+    if(visited[vertex] == 1) return true;
+    if(visited[vertex] == 2) return false;
+    
+    visited[vertex] = 1;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[vertex][i] == 1) {
+            if(isCyclicDirectedUtil(g, i, visited)) {
+                return true;
+            }
+        }
+    }
+    
+    visited[vertex] = 2;
+    return false;
+}
+
+bool hasCycleDirected(Graph* g) {
+    int visited[MAX] = {0};
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(visited[i] == 0) {
+            if(isCyclicDirectedUtil(g, i, visited)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v, type;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Choose graph type:\n");
+    printf("1. Undirected\n");
+    printf("2. Directed\n");
+    printf("Enter choice: ");
+    scanf("%d", &type);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        if(type == 1) {
+            addEdge(&g, u, v);
+        } else {
+            g.adjMatrix[u][v] = 1;
+        }
+    }
+    
+    bool cycle;
+    if(type == 1) {
+        cycle = hasCycle(&g);
+        printf("\nUndirected Graph ");
+    } else {
+        cycle = hasCycleDirected(&g);
+        printf("\nDirected Graph ");
+    }
+    
+    if(cycle) {
+        printf("has a cycle\n");
+    } else {
+        printf("does NOT have a cycle\n");
+    }
+    
+    return 0;
+}
+
+b) bool canFinish(int numCourses, int** prerequisites, int prerequisitesSize, int* prerequisitesColSize) {
+    // Build adjacency list
+    int** adj = (int**)malloc(numCourses * sizeof(int*));
+    int* adjSize = (int*)calloc(numCourses, sizeof(int));
+    
+    for(int i = 0; i < numCourses; i++) {
+        adj[i] = (int*)malloc(numCourses * sizeof(int));
+    }
+    
+    for(int i = 0; i < prerequisitesSize; i++) {
+        int course = prerequisites[i][0];
+        int prereq = prerequisites[i][1];
+        adj[prereq][adjSize[prereq]++] = course;
+    }
+    
+    // 0 = unvisited, 1 = visiting, 2 = visited
+    int* state = (int*)calloc(numCourses, sizeof(int));
+    
+    // DFS to detect cycle
+    int* stack = (int*)malloc(numCourses * sizeof(int));
+    
+    for(int i = 0; i < numCourses; i++) {
+        if(state[i] == 0) {
+            int top = -1;
+            stack[++top] = i;
+            
+            while(top >= 0) {
+                int course = stack[top];
+                
+                if(state[course] == 0) {
+                    state[course] = 1;
+                    
+                    for(int j = adjSize[course] - 1; j >= 0; j--) {
+                        int next = adj[course][j];
+                        if(state[next] == 1) {
+                            // Cycle detected
+                            free(adj);
+                            free(adjSize);
+                            free(state);
+                            free(stack);
+                            return false;
+                        }
+                        if(state[next] == 0) {
+                            stack[++top] = next;
+                        }
+                    }
+                } else {
+                    state[course] = 2;
+                    top--;
+                }
+            }
+        }
+    }
+    
+    // Clean up
+    for(int i = 0; i < numCourses; i++) {
+        free(adj[i]);
+    }
+    free(adj);
+    free(adjSize);
+    free(state);
+    free(stack);
+    
+    return true;
+}
+
+66)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->adjMatrix[u][v] = 1;
+}
+
+// Topological Sort using DFS
+void topologicalSortDFS(Graph* g, int vertex, int* visited, int* stack, int* stackTop) {
+    visited[vertex] = 1;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+            topologicalSortDFS(g, i, visited, stack, stackTop);
+        }
+    }
+    
+    stack[++(*stackTop)] = vertex;
+}
+
+void topologicalSort(Graph* g) {
+    int visited[MAX] = {0};
+    int stack[MAX];
+    int stackTop = -1;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            topologicalSortDFS(g, i, visited, stack, &stackTop);
+        }
+    }
+    
+    printf("Topological Order: ");
+    for(int i = stackTop; i >= 0; i--) {
+        printf("%d ", stack[i]);
+    }
+    printf("\n");
+}
+
+// Topological Sort using Kahn's Algorithm (BFS with indegree)
+void topologicalSortKahn(Graph* g) {
+    int indegree[MAX] = {0};
+    int queue[MAX], front = 0, rear = 0;
+    int result[MAX], resultSize = 0;
+    
+    // Calculate indegree
+    for(int i = 0; i < g->vertices; i++) {
+        for(int j = 0; j < g->vertices; j++) {
+            if(g->adjMatrix[i][j] == 1) {
+                indegree[j]++;
+            }
+        }
+    }
+    
+    // Enqueue vertices with indegree 0
+    for(int i = 0; i < g->vertices; i++) {
+        if(indegree[i] == 0) {
+            queue[rear++] = i;
+        }
+    }
+    
+    while(front < rear) {
+        int vertex = queue[front++];
+        result[resultSize++] = vertex;
+        
+        for(int i = 0; i < g->vertices; i++) {
+            if(g->adjMatrix[vertex][i] == 1) {
+                indegree[i]--;
+                if(indegree[i] == 0) {
+                    queue[rear++] = i;
+                }
+            }
+        }
+    }
+    
+    if(resultSize != g->vertices) {
+        printf("Graph has a cycle! Topological sort not possible.\n");
+        return;
+    }
+    
+    printf("Topological Order (Kahn's): ");
+    for(int i = 0; i < resultSize; i++) {
+        printf("%d ", result[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    printf("Enter edges (u -> v):\n");
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d: ", i + 1);
+        scanf("%d %d", &u, &v);
+        addEdge(&g, u, v);
+    }
+    
+    topologicalSort(&g);
+    topologicalSortKahn(&g);
+    
+    return 0;
+}
+
+b) /**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* findOrder(int numCourses, int** prerequisites, int prerequisitesSize, int* prerequisitesColSize, int* returnSize) {
+    // Build adjacency list and indegree array
+    int** adj = (int**)malloc(numCourses * sizeof(int*));
+    int* adjSize = (int*)calloc(numCourses, sizeof(int));
+    int* indegree = (int*)calloc(numCourses, sizeof(int));
+    
+    for(int i = 0; i < numCourses; i++) {
+        adj[i] = (int*)malloc(numCourses * sizeof(int));
+    }
+    
+    for(int i = 0; i < prerequisitesSize; i++) {
+        int course = prerequisites[i][0];
+        int prereq = prerequisites[i][1];
+        adj[prereq][adjSize[prereq]++] = course;
+        indegree[course]++;
+    }
+    
+    // Kahn's algorithm
+    int* queue = (int*)malloc(numCourses * sizeof(int));
+    int front = 0, rear = 0;
+    
+    for(int i = 0; i < numCourses; i++) {
+        if(indegree[i] == 0) {
+            queue[rear++] = i;
+        }
+    }
+    
+    int* result = (int*)malloc(numCourses * sizeof(int));
+    *returnSize = 0;
+    
+    while(front < rear) {
+        int course = queue[front++];
+        result[(*returnSize)++] = course;
+        
+        for(int i = 0; i < adjSize[course]; i++) {
+            int next = adj[course][i];
+            indegree[next]--;
+            if(indegree[next] == 0) {
+                queue[rear++] = next;
+            }
+        }
+    }
+    
+    // Clean up
+    for(int i = 0; i < numCourses; i++) {
+        free(adj[i]);
+    }
+    free(adj);
+    free(adjSize);
+    free(indegree);
+    free(queue);
+    
+    if(*returnSize != numCourses) {
+        *returnSize = 0;
+        free(result);
+        return NULL;
+    }
+    
+    return result;
+}
+
+67)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+void dfs(char grid[MAX][MAX], int rows, int cols, int r, int c) {
+    if(r < 0 || r >= rows || c < 0 || c >= cols || grid[r][c] == '0') {
+        return;
+    }
+    
+    grid[r][c] = '0';  // Mark as visited
+    
+    // Visit all 4 directions
+    dfs(grid, rows, cols, r + 1, c);
+    dfs(grid, rows, cols, r - 1, c);
+    dfs(grid, rows, cols, r, c + 1);
+    dfs(grid, rows, cols, r, c - 1);
+}
+
+int numIslands(char grid[MAX][MAX], int rows, int cols) {
+    int count = 0;
+    
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(grid[i][j] == '1') {
+                count++;
+                dfs(grid, rows, cols, i, j);
+            }
+        }
+    }
+    
+    return count;
+}
+
+int main() {
+    char grid[MAX][MAX];
+    int rows, cols;
+    
+    printf("Enter number of rows and columns: ");
+    scanf("%d %d", &rows, &cols);
+    
+    printf("Enter grid (0 for water, 1 for land):\n");
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            scanf(" %c", &grid[i][j]);
+        }
+    }
+    
+    printf("Number of islands: %d\n", numIslands(grid, rows, cols));
+    
+    return 0;
+}
+
+b) void dfs(char** grid, int rows, int cols, int r, int c) {
+    if(r < 0 || r >= rows || c < 0 || c >= cols || grid[r][c] == '0') {
+        return;
+    }
+    
+    grid[r][c] = '0';
+    
+    dfs(grid, rows, cols, r + 1, c);
+    dfs(grid, rows, cols, r - 1, c);
+    dfs(grid, rows, cols, r, c + 1);
+    dfs(grid, rows, cols, r, c - 1);
+}
+
+int numIslands(char** grid, int gridSize, int* gridColSize) {
+    if(gridSize == 0) return 0;
+    
+    int count = 0;
+    
+    for(int i = 0; i < gridSize; i++) {
+        for(int j = 0; j < gridColSize[i]; j++) {
+            if(grid[i][j] == '1') {
+                count++;
+                dfs(grid, gridSize, gridColSize[i], i, j);
+            }
+        }
+    }
+    
+    return count;
+}
+
+68)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+void dfs(char board[MAX][MAX], int rows, int cols, int r, int c) {
+    if(r < 0 || r >= rows || c < 0 || c >= cols || board[r][c] != 'O') {
+        return;
+    }
+    
+    board[r][c] = '#';  // Mark as safe
+    
+    dfs(board, rows, cols, r + 1, c);
+    dfs(board, rows, cols, r - 1, c);
+    dfs(board, rows, cols, r, c + 1);
+    dfs(board, rows, cols, r, c - 1);
+}
+
+void solveSurrounded(char board[MAX][MAX], int rows, int cols) {
+    if(rows == 0) return;
+    
+    // Mark all 'O's on boundary and their connected cells as safe
+    for(int i = 0; i < rows; i++) {
+        if(board[i][0] == 'O') dfs(board, rows, cols, i, 0);
+        if(board[i][cols - 1] == 'O') dfs(board, rows, cols, i, cols - 1);
+    }
+    
+    for(int j = 0; j < cols; j++) {
+        if(board[0][j] == 'O') dfs(board, rows, cols, 0, j);
+        if(board[rows - 1][j] == 'O') dfs(board, rows, cols, rows - 1, j);
+    }
+    
+    // Convert all remaining 'O' to 'X', and '#' back to 'O'
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(board[i][j] == 'O') {
+                board[i][j] = 'X';
+            } else if(board[i][j] == '#') {
+                board[i][j] = 'O';
+            }
+        }
+    }
+}
+
+void printBoard(char board[MAX][MAX], int rows, int cols) {
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            printf("%c ", board[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    char board[MAX][MAX];
+    int rows, cols;
+    
+    printf("Enter number of rows and columns: ");
+    scanf("%d %d", &rows, &cols);
+    
+    printf("Enter board (X or O):\n");
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            scanf(" %c", &board[i][j]);
+        }
+    }
+    
+    printf("\nOriginal Board:\n");
+    printBoard(board, rows, cols);
+    
+    solveSurrounded(board, rows, cols);
+    
+    printf("\nBoard after solving surrounded regions:\n");
+    printBoard(board, rows, cols);
+    
+    return 0;
+}
+
+b) void dfs(char** board, int rows, int cols, int r, int c) {
+    if(r < 0 || r >= rows || c < 0 || c >= cols || board[r][c] != 'O') {
+        return;
+    }
+    
+    board[r][c] = '#';
+    
+    dfs(board, rows, cols, r + 1, c);
+    dfs(board, rows, cols, r - 1, c);
+    dfs(board, rows, cols, r, c + 1);
+    dfs(board, rows, cols, r, c - 1);
+}
+
+void solve(char** board, int boardSize, int* boardColSize) {
+    if(boardSize == 0) return;
+    int rows = boardSize;
+    int cols = boardColSize[0];
+    
+    // Mark boundary-connected 'O's
+    for(int i = 0; i < rows; i++) {
+        if(board[i][0] == 'O') dfs(board, rows, cols, i, 0);
+        if(board[i][cols - 1] == 'O') dfs(board, rows, cols, i, cols - 1);
+    }
+    
+    for(int j = 0; j < cols; j++) {
+        if(board[0][j] == 'O') dfs(board, rows, cols, 0, j);
+        if(board[rows - 1][j] == 'O') dfs(board, rows, cols, rows - 1, j);
+    }
+    
+    // Convert
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(board[i][j] == 'O') {
+                board[i][j] = 'X';
+            } else if(board[i][j] == '#') {
+                board[i][j] = 'O';
+            }
+        }
+    }
+}
+
+69)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = (i == j) ? 0 : INT_MAX;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v, int weight) {
+    g->adjMatrix[u][v] = weight;
+    g->adjMatrix[v][u] = weight;  // For undirected
+}
+
+int minDistance(int dist[], bool visited[], int n) {
+    int min = INT_MAX, minIndex = -1;
+    
+    for(int i = 0; i < n; i++) {
+        if(!visited[i] && dist[i] <= min) {
+            min = dist[i];
+            minIndex = i;
+        }
+    }
+    
+    return minIndex;
+}
+
+void dijkstra(Graph* g, int src) {
+    int dist[MAX];
+    bool visited[MAX];
+    int parent[MAX];
+    
+    // Initialize
+    for(int i = 0; i < g->vertices; i++) {
+        dist[i] = INT_MAX;
+        visited[i] = false;
+        parent[i] = -1;
+    }
+    
+    dist[src] = 0;
+    
+    for(int count = 0; count < g->vertices - 1; count++) {
+        int u = minDistance(dist, visited, g->vertices);
+        if(u == -1) break;
+        visited[u] = true;
+        
+        for(int v = 0; v < g->vertices; v++) {
+            if(!visited[v] && g->adjMatrix[u][v] != INT_MAX && 
+               dist[u] != INT_MAX && dist[u] + g->adjMatrix[u][v] < dist[v]) {
+                dist[v] = dist[u] + g->adjMatrix[u][v];
+                parent[v] = u;
+            }
+        }
+    }
+    
+    // Print results
+    printf("\nDijkstra's Algorithm Results (Source: %d):\n", src);
+    printf("Vertex\tDistance\tPath\n");
+    for(int i = 0; i < g->vertices; i++) {
+        printf("%d\t%d\t\t", i, dist[i]);
+        
+        // Print path
+        if(dist[i] == INT_MAX) {
+            printf("No path\n");
+        } else {
+            int path[MAX], pathLen = 0;
+            int current = i;
+            while(current != -1) {
+                path[pathLen++] = current;
+                current = parent[current];
+            }
+            for(int j = pathLen - 1; j >= 0; j--) {
+                printf("%d", path[j]);
+                if(j > 0) printf(" -> ");
+            }
+            printf("\n");
+        }
+    }
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v, weight, src;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    printf("Enter edges (u v weight):\n");
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d: ", i + 1);
+        scanf("%d %d %d", &u, &v, &weight);
+        addEdge(&g, u, v, weight);
+    }
+    
+    printf("\nEnter source vertex: ");
+    scanf("%d", &src);
+    
+    dijkstra(&g, src);
+    
+    return 0;
+}
+
+b) #include <limits.h>
+#include <stdlib.h>
+
+int networkDelayTime(int** times, int timesSize, int* timesColSize, int n, int k) {
+    // Build adjacency matrix
+    int** graph = (int**)malloc((n + 1) * sizeof(int*));
+    for(int i = 1; i <= n; i++) {
+        graph[i] = (int*)malloc((n + 1) * sizeof(int));
+        for(int j = 1; j <= n; j++) {
+            graph[i][j] = (i == j) ? 0 : INT_MAX;
+        }
+    }
+    
+    for(int i = 0; i < timesSize; i++) {
+        int u = times[i][0];
+        int v = times[i][1];
+        int w = times[i][2];
+        graph[u][v] = w;
+    }
+    
+    // Dijkstra's algorithm
+    int* dist = (int*)malloc((n + 1) * sizeof(int));
+    int* visited = (int*)calloc(n + 1, sizeof(int));
+    
+    for(int i = 1; i <= n; i++) {
+        dist[i] = INT_MAX;
+    }
+    dist[k] = 0;
+    
+    for(int count = 0; count < n; count++) {
+        int u = -1;
+        int minDist = INT_MAX;
+        
+        for(int i = 1; i <= n; i++) {
+            if(!visited[i] && dist[i] < minDist) {
+                minDist = dist[i];
+                u = i;
+            }
+        }
+        
+        if(u == -1) break;
+        visited[u] = 1;
+        
+        for(int v = 1; v <= n; v++) {
+            if(!visited[v] && graph[u][v] != INT_MAX && 
+               dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+            }
+        }
+    }
+    
+    // Find maximum distance
+    int maxDist = 0;
+    for(int i = 1; i <= n; i++) {
+        if(dist[i] == INT_MAX) {
+            maxDist = -1;
+            break;
+        }
+        if(dist[i] > maxDist) {
+            maxDist = dist[i];
+        }
+    }
+    
+    // Clean up
+    for(int i = 1; i <= n; i++) {
+        free(graph[i]);
+    }
+    free(graph);
+    free(dist);
+    free(visited);
+    
+    return maxDist;
+}
+
+70)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_EDGES 1000
+#define MAX_VERTICES 100
+
+typedef struct {
+    int u, v, weight;
+} Edge;
+
+typedef struct {
+    int vertices;
+    int edges;
+    Edge edgeList[MAX_EDGES];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    g->edges = 0;
+}
+
+void addEdge(Graph* g, int u, int v, int weight) {
+    g->edgeList[g->edges].u = u;
+    g->edgeList[g->edges].v = v;
+    g->edgeList[g->edges].weight = weight;
+    g->edges++;
+}
+
+void bellmanFord(Graph* g, int src) {
+    int dist[MAX_VERTICES];
+    int parent[MAX_VERTICES];
+    
+    // Initialize distances
+    for(int i = 0; i < g->vertices; i++) {
+        dist[i] = INT_MAX;
+        parent[i] = -1;
+    }
+    dist[src] = 0;
+    
+    // Relax edges |V| - 1 times
+    for(int i = 1; i <= g->vertices - 1; i++) {
+        for(int j = 0; j < g->edges; j++) {
+            int u = g->edgeList[j].u;
+            int v = g->edgeList[j].v;
+            int w = g->edgeList[j].weight;
+            
+            if(dist[u] != INT_MAX && dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                parent[v] = u;
+            }
+        }
+    }
+    
+    // Check for negative weight cycles
+    int hasNegativeCycle = 0;
+    for(int j = 0; j < g->edges; j++) {
+        int u = g->edgeList[j].u;
+        int v = g->edgeList[j].v;
+        int w = g->edgeList[j].weight;
+        
+        if(dist[u] != INT_MAX && dist[u] + w < dist[v]) {
+            hasNegativeCycle = 1;
+            break;
+        }
+    }
+    
+    // Print results
+    printf("\nBellman-Ford Algorithm Results (Source: %d):\n", src);
+    
+    if(hasNegativeCycle) {
+        printf("Graph contains a negative weight cycle!\n");
+        return;
+    }
+    
+    printf("Vertex\tDistance\tPath\n");
+    for(int i = 0; i < g->vertices; i++) {
+        if(dist[i] == INT_MAX) {
+            printf("%d\tINF\t\tNo path\n", i);
+        } else {
+            printf("%d\t%d\t\t", i, dist[i]);
+            
+            // Print path
+            int path[MAX_VERTICES], pathLen = 0;
+            int current = i;
+            while(current != -1) {
+                path[pathLen++] = current;
+                current = parent[current];
+            }
+            for(int j = pathLen - 1; j >= 0; j--) {
+                printf("%d", path[j]);
+                if(j > 0) printf(" -> ");
+            }
+            printf("\n");
+        }
+    }
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v, weight, src;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    printf("Enter edges (u v weight):\n");
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d: ", i + 1);
+        scanf("%d %d %d", &u, &v, &weight);
+        addEdge(&g, u, v, weight);
+    }
+    
+    printf("\nEnter source vertex: ");
+    scanf("%d", &src);
+    
+    bellmanFord(&g, src);
+    
+    return 0;
+}
+
+b) #include <stdlib.h>
+#include <limits.h>
+
+int findCheapestPrice(int n, int** flights, int flightsSize, int* flightsColSize, int src, int dst, int k) {
+    int* dist = (int*)malloc(n * sizeof(int));
+    int* temp = (int*)malloc(n * sizeof(int));
+    
+    for(int i = 0; i < n; i++) {
+        dist[i] = INT_MAX;
+    }
+    dist[src] = 0;
+    
+    // Run Bellman-Ford for k+1 iterations
+    for(int i = 0; i <= k; i++) {
+        // Copy current distances to temp
+        for(int j = 0; j < n; j++) {
+            temp[j] = dist[j];
+        }
+        
+        // Relax all edges
+        for(int j = 0; j < flightsSize; j++) {
+            int u = flights[j][0];
+            int v = flights[j][1];
+            int w = flights[j][2];
+            
+            if(dist[u] != INT_MAX && dist[u] + w < temp[v]) {
+                temp[v] = dist[u] + w;
+            }
+        }
+        
+        // Update distances
+        for(int j = 0; j < n; j++) {
+            dist[j] = temp[j];
+        }
+    }
+    
+    int result = (dist[dst] == INT_MAX) ? -1 : dist[dst];
+    
+    free(dist);
+    free(temp);
+    
+    return result;
+}
+
+71)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define TABLE_SIZE 11
+#define EMPTY -1
+#define DELETED -2
+
+typedef struct {
+    int* table;
+    int size;
+    int count;
+} HashTable;
+
+// Initialize hash table
+HashTable* createHashTable(int size) {
+    HashTable* ht = (HashTable*)malloc(sizeof(HashTable));
+    ht->table = (int*)malloc(size * sizeof(int));
+    ht->size = size;
+    ht->count = 0;
+    
+    for(int i = 0; i < size; i++) {
+        ht->table[i] = EMPTY;
+    }
+    
+    return ht;
+}
+
+// Hash function
+int hash(int key, int size) {
+    return key % size;
+}
+
+// Quadratic probing insert
+void insertQuadratic(HashTable* ht, int key) {
+    if(ht->count >= ht->size) {
+        printf("Hash table is full! Cannot insert %d\n", key);
+        return;
+    }
+    
+    int index = hash(key, ht->size);
+    int i = 0;
+    
+    // Quadratic probing
+    while(ht->table[(index + i * i) % ht->size] != EMPTY && 
+          ht->table[(index + i * i) % ht->size] != DELETED) {
+        i++;
+        if(i > ht->size) {
+            printf("Cannot insert %d - table full\n", key);
+            return;
+        }
+    }
+    
+    int finalIndex = (index + i * i) % ht->size;
+    ht->table[finalIndex] = key;
+    ht->count++;
+    printf("Inserted %d at index %d\n", key, finalIndex);
+}
+
+// Search using quadratic probing
+int searchQuadratic(HashTable* ht, int key) {
+    int index = hash(key, ht->size);
+    int i = 0;
+    
+    while(ht->table[(index + i * i) % ht->size] != EMPTY) {
+        int currentIndex = (index + i * i) % ht->size;
+        if(ht->table[currentIndex] == key) {
+            return currentIndex;
+        }
+        i++;
+        if(i > ht->size) break;
+    }
+    
+    return -1;
+}
+
+// Delete using quadratic probing (lazy deletion)
+void deleteQuadratic(HashTable* ht, int key) {
+    int index = searchQuadratic(ht, key);
+    if(index != -1) {
+        ht->table[index] = DELETED;
+        ht->count--;
+        printf("Deleted %d from index %d\n", key, index);
+    } else {
+        printf("Key %d not found\n", key);
+    }
+}
+
+// Linear probing insert (for comparison)
+void insertLinear(HashTable* ht, int key) {
+    if(ht->count >= ht->size) {
+        printf("Hash table is full!\n");
+        return;
+    }
+    
+    int index = hash(key, ht->size);
+    
+    while(ht->table[index] != EMPTY && ht->table[index] != DELETED) {
+        index = (index + 1) % ht->size;
+    }
+    
+    ht->table[index] = key;
+    ht->count++;
+    printf("Inserted %d at index %d (Linear)\n", key, index);
+}
+
+// Display hash table
+void displayHashTable(HashTable* ht) {
+    printf("\nHash Table:\n");
+    printf("Index\tValue\n");
+    for(int i = 0; i < ht->size; i++) {
+        if(ht->table[i] == EMPTY) {
+            printf("%d\tEMPTY\n", i);
+        } else if(ht->table[i] == DELETED) {
+            printf("%d\tDELETED\n", i);
+        } else {
+            printf("%d\t%d\n", i, ht->table[i]);
+        }
+    }
+}
+
+int main() {
+    HashTable* ht = createHashTable(TABLE_SIZE);
+    int choice, key, probingType;
+    
+    printf("Choose probing method:\n");
+    printf("1. Quadratic Probing\n");
+    printf("2. Linear Probing\n");
+    printf("Enter choice: ");
+    scanf("%d", &probingType);
+    
+    while(1) {
+        printf("\n--- Hash Table Menu ---\n");
+        printf("1. Insert\n");
+        printf("2. Search\n");
+        printf("3. Delete\n");
+        printf("4. Display\n");
+        printf("5. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+        
+        switch(choice) {
+            case 1:
+                printf("Enter key to insert: ");
+                scanf("%d", &key);
+                if(probingType == 1) {
+                    insertQuadratic(ht, key);
+                } else {
+                    insertLinear(ht, key);
+                }
+                break;
+            case 2:
+                printf("Enter key to search: ");
+                scanf("%d", &key);
+                int idx = searchQuadratic(ht, key);
+                if(idx != -1) {
+                    printf("Key %d found at index %d\n", key, idx);
+                } else {
+                    printf("Key %d not found\n", key);
+                }
+                break;
+            case 3:
+                printf("Enter key to delete: ");
+                scanf("%d", &key);
+                deleteQuadratic(ht, key);
+                break;
+            case 4:
+                displayHashTable(ht);
+                break;
+            case 5:
+                printf("Exiting...\n");
+                free(ht->table);
+                free(ht);
+                return 0;
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+    
+    return 0;
+}
+
+b) #include <stdio.h>
+#include <limits.h>
+#include <stdbool.h>
+
+#define MAX 10
+
+int tsp(int graph[MAX][MAX], int n, int start) {
+    int vertices[MAX];
+    for(int i = 0; i < n; i++) {
+        vertices[i] = i;
+    }
+    
+    // Simple brute force (for small n)
+    int minCost = INT_MAX;
+    
+    // Generate all permutations (simplified - using recursion)
+    // This is a simplified version
+    
+    // For a proper TSP solution, use Held-Karp DP:
+    // dp[mask][i] = min cost to visit all cities in mask ending at i
+    
+    int dp[1 << MAX][MAX];
+    for(int i = 0; i < (1 << n); i++) {
+        for(int j = 0; j < n; j++) {
+            dp[i][j] = INT_MAX;
+        }
+    }
+    
+    dp[1 << start][start] = 0;
+    
+    for(int mask = 1; mask < (1 << n); mask++) {
+        for(int u = 0; u < n; u++) {
+            if(dp[mask][u] != INT_MAX) {
+                for(int v = 0; v < n; v++) {
+                    if(!(mask & (1 << v)) && graph[u][v] != 0) {
+                        int newMask = mask | (1 << v);
+                        int newCost = dp[mask][u] + graph[u][v];
+                        if(newCost < dp[newMask][v]) {
+                            dp[newMask][v] = newCost;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    int finalMask = (1 << n) - 1;
+    for(int v = 0; v < n; v++) {
+        if(dp[finalMask][v] != INT_MAX && graph[v][start] != 0) {
+            int total = dp[finalMask][v] + graph[v][start];
+            if(total < minCost) {
+                minCost = total;
+            }
+        }
+    }
+    
+    return minCost;
+}
+
+int main() {
+    int graph[MAX][MAX], n;
+    
+    printf("Enter number of cities: ");
+    scanf("%d", &n);
+    
+    printf("Enter adjacency matrix (0 for no edge):\n");
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+    
+    int start = 0;
+    int minCost = tsp(graph, n, start);
+    
+    printf("Minimum TSP cost: %d\n", minCost);
+    
+    return 0;
+}
+
+72)
+
+a) #include <stdio.h>
+#include <string.h>
+#include <limits.h>
+
+#define MAX_CHAR 256
+
+// Find first character that repeats
+char firstRepeatedChar(char* str) {
+    int count[MAX_CHAR] = {0};
+    
+    for(int i = 0; str[i] != '\0'; i++) {
+        count[(int)str[i]]++;
+    }
+    
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(count[(int)str[i]] > 1) {
+            return str[i];
+        }
+    }
+    
+    return '\0';
+}
+
+// Find first non-repeating character
+char firstNonRepeatingChar(char* str) {
+    int count[MAX_CHAR] = {0};
+    
+    for(int i = 0; str[i] != '\0'; i++) {
+        count[(int)str[i]]++;
+    }
+    
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(count[(int)str[i]] == 1) {
+            return str[i];
+        }
+    }
+    
+    return '\0';
+}
+
+// Find index of first repeated character
+int firstRepeatedIndex(char* str) {
+    int firstIndex[MAX_CHAR];
+    for(int i = 0; i < MAX_CHAR; i++) {
+        firstIndex[i] = -1;
+    }
+    
+    int minIndex = INT_MAX;
+    
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(firstIndex[(int)str[i]] == -1) {
+            firstIndex[(int)str[i]] = i;
+        } else {
+            if(firstIndex[(int)str[i]] < minIndex) {
+                minIndex = firstIndex[(int)str[i]];
+            }
+        }
+    }
+    
+    return minIndex;
+}
+
+int main() {
+    char str[100];
+    
+    printf("Enter a string: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    
+    char repeated = firstRepeatedChar(str);
+    if(repeated != '\0') {
+        printf("First repeated character: '%c'\n", repeated);
+    } else {
+        printf("No repeated character found\n");
+    }
+    
+    char nonRepeated = firstNonRepeatingChar(str);
+    if(nonRepeated != '\0') {
+        printf("First non-repeating character: '%c'\n", nonRepeated);
+    } else {
+        printf("No non-repeating character found\n");
+    }
+    
+    int idx = firstRepeatedIndex(str);
+    if(idx != INT_MAX) {
+        printf("Index of first repeated character: %d\n", idx);
+    }
+    
+    return 0;
+}
+
+b) // Already covered in Day 61, but here's a review:
+
+typedef struct {
+    int vertices;
+    int** matrix;
+} Graph;
+
+Graph* createGraph(int vertices) {
+    Graph* g = (Graph*)malloc(sizeof(Graph));
+    g->vertices = vertices;
+    g->matrix = (int**)malloc(vertices * sizeof(int*));
+    for(int i = 0; i < vertices; i++) {
+        g->matrix[i] = (int*)calloc(vertices, sizeof(int));
+    }
+    return g;
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->matrix[u][v] = 1;
+    g->matrix[v][u] = 1;  // For undirected
+}
+
+void printGraph(Graph* g) {
+    for(int i = 0; i < g->vertices; i++) {
+        for(int j = 0; j < g->vertices; j++) {
+            printf("%d ", g->matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+73)
+
+a) #include <stdio.h>
+#include <string.h>
+#include <limits.h>
+
+#define MAX_CHAR 256
+
+int longestUniqueSubstring(char* str) {
+    int lastIndex[MAX_CHAR];
+    for(int i = 0; i < MAX_CHAR; i++) {
+        lastIndex[i] = -1;
+    }
+    
+    int maxLen = 0;
+    int start = 0;
+    int n = strlen(str);
+    
+    for(int end = 0; end < n; end++) {
+        char ch = str[end];
+        
+        if(lastIndex[(int)ch] >= start) {
+            start = lastIndex[(int)ch] + 1;
+        }
+        
+        lastIndex[(int)ch] = end;
+        int currentLen = end - start + 1;
+        if(currentLen > maxLen) {
+            maxLen = currentLen;
+        }
+    }
+    
+    return maxLen;
+}
+
+// Print the longest substring
+void printLongestUniqueSubstring(char* str) {
+    int lastIndex[MAX_CHAR];
+    for(int i = 0; i < MAX_CHAR; i++) {
+        lastIndex[i] = -1;
+    }
+    
+    int maxLen = 0;
+    int start = 0;
+    int maxStart = 0;
+    int n = strlen(str);
+    
+    for(int end = 0; end < n; end++) {
+        char ch = str[end];
+        
+        if(lastIndex[(int)ch] >= start) {
+            start = lastIndex[(int)ch] + 1;
+        }
+        
+        lastIndex[(int)ch] = end;
+        int currentLen = end - start + 1;
+        if(currentLen > maxLen) {
+            maxLen = currentLen;
+            maxStart = start;
+        }
+    }
+    
+    printf("Longest substring without repeating: ");
+    for(int i = maxStart; i < maxStart + maxLen; i++) {
+        printf("%c", str[i]);
+    }
+    printf("\nLength: %d\n", maxLen);
+}
+
+int main() {
+    char str[100];
+    
+    printf("Enter a string: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    
+    printLongestUniqueSubstring(str);
+    
+    return 0;
+}
+
+b) int lengthOfLongestSubstring(char* s) {
+    int lastIndex[128];
+    for(int i = 0; i < 128; i++) {
+        lastIndex[i] = -1;
+    }
+    
+    int maxLen = 0;
+    int start = 0;
+    int n = strlen(s);
+    
+    for(int end = 0; end < n; end++) {
+        char ch = s[end];
+        
+        if(lastIndex[(int)ch] >= start) {
+            start = lastIndex[(int)ch] + 1;
+        }
+        
+        lastIndex[(int)ch] = end;
+        int currentLen = end - start + 1;
+        if(currentLen > maxLen) {
+            maxLen = currentLen;
+        }
+    }
+    
+    return maxLen;
+}
+
+74)
+
+a) #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_VOTES 100
+#define MAX_NAME 50
+
+typedef struct {
+    char name[MAX_NAME];
+    int votes;
+} Candidate;
+
+int findCandidate(Candidate candidates[], int count, char* name) {
+    for(int i = 0; i < count; i++) {
+        if(strcmp(candidates[i].name, name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void findWinner(char* votes[], int n) {
+    Candidate candidates[MAX_VOTES];
+    int candidateCount = 0;
+    
+    for(int i = 0; i < n; i++) {
+        int idx = findCandidate(candidates, candidateCount, votes[i]);
+        if(idx == -1) {
+            strcpy(candidates[candidateCount].name, votes[i]);
+            candidates[candidateCount].votes = 1;
+            candidateCount++;
+        } else {
+            candidates[idx].votes++;
+        }
+    }
+    
+    // Find winner
+    int maxVotes = 0;
+    int winnerIndex = 0;
+    for(int i = 0; i < candidateCount; i++) {
+        if(candidates[i].votes > maxVotes) {
+            maxVotes = candidates[i].votes;
+            winnerIndex = i;
+        } else if(candidates[i].votes == maxVotes) {
+            // Tie - choose lexicographically smaller
+            if(strcmp(candidates[i].name, candidates[winnerIndex].name) < 0) {
+                winnerIndex = i;
+            }
+        }
+    }
+    
+    printf("Winner: %s\n", candidates[winnerIndex].name);
+    printf("Votes: %d\n", maxVotes);
+}
+
+int main() {
+    char* votes[] = {"john", "johnny", "jackie", "johnny", "john", "jackie", "jamie", "jamie", "john", "johnny", "jamie", "johnny", "john"};
+    int n = sizeof(votes) / sizeof(votes[0]);
+    
+    findWinner(votes, n);
+    
+    return 0;
+}
+
+b) void dfs(int** adj, int* adjSize, int node, int* visited) {
+    visited[node] = 1;
+    
+    for(int i = 0; i < adjSize[node]; i++) {
+        int neighbor = adj[node][i];
+        if(!visited[neighbor]) {
+            dfs(adj, adjSize, neighbor, visited);
+        }
+    }
+}
+
+int countComponents(int n, int** edges, int edgesSize, int* edgesColSize) {
+    // Build adjacency list
+    int** adj = (int**)malloc(n * sizeof(int*));
+    int* adjSize = (int*)calloc(n, sizeof(int));
+    
+    for(int i = 0; i < n; i++) {
+        adj[i] = (int*)malloc(n * sizeof(int));
+    }
+    
+    for(int i = 0; i < edgesSize; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        adj[u][adjSize[u]++] = v;
+        adj[v][adjSize[v]++] = u;
+    }
+    
+    int* visited = (int*)calloc(n, sizeof(int));
+    int components = 0;
+    
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            components++;
+            dfs(adj, adjSize, i, visited);
+        }
+    }
+    
+    // Cleanup
+    for(int i = 0; i < n; i++) {
+        free(adj[i]);
+    }
+    free(adj);
+    free(adjSize);
+    free(visited);
+    
+    return components;
+}
+
+75)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int largestSubarrayWithZeroSum(int arr[], int n) {
+    int maxLen = 0;
+    int prefixSum = 0;
+    
+    // Simple approach: O(n²)
+    for(int i = 0; i < n; i++) {
+        prefixSum = 0;
+        for(int j = i; j < n; j++) {
+            prefixSum += arr[j];
+            if(prefixSum == 0) {
+                maxLen = max(maxLen, j - i + 1);
+            }
+        }
+    }
+    
+    return maxLen;
+}
+
+// Optimized using hash map (simulated with array for small ranges)
+int largestSubarrayWithZeroSumOptimized(int arr[], int n) {
+    int maxLen = 0;
+    int prefixSum = 0;
+    int hashMap[MAX * 2 + 1];  // For small range values
+    
+    for(int i = 0; i < MAX * 2 + 1; i++) {
+        hashMap[i] = -2;  // -2 means not seen
+    }
+    
+    hashMap[MAX] = -1;  // For sum 0 at index -1
+    
+    for(int i = 0; i < n; i++) {
+        prefixSum += arr[i];
+        int index = prefixSum + MAX;
+        
+        if(hashMap[index] != -2) {
+            maxLen = max(maxLen, i - hashMap[index]);
+        } else {
+            hashMap[index] = i;
+        }
+    }
+    
+    return maxLen;
+}
+
+int main() {
+    int arr[MAX], n;
+    
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d elements: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    int result = largestSubarrayWithZeroSum(arr, n);
+    printf("Largest subarray with zero sum length: %d\n", result);
+    
+    return 0;
+}
+
+b) #include <stdbool.h>
+#include <stdlib.h>
+
+bool isBipartite(int** graph, int graphSize, int* graphColSize) {
+    int* color = (int*)calloc(graphSize, sizeof(int));  // 0 = uncolored, 1 = red, -1 = blue
+    
+    for(int i = 0; i < graphSize; i++) {
+        if(color[i] == 0) {
+            // BFS
+            int* queue = (int*)malloc(graphSize * sizeof(int));
+            int front = 0, rear = 0;
+            
+            color[i] = 1;
+            queue[rear++] = i;
+            
+            while(front < rear) {
+                int node = queue[front++];
+                
+                for(int j = 0; j < graphColSize[node]; j++) {
+                    int neighbor = graph[node][j];
+                    
+                    if(color[neighbor] == 0) {
+                        color[neighbor] = -color[node];
+                        queue[rear++] = neighbor;
+                    } else if(color[neighbor] == color[node]) {
+                        free(queue);
+                        free(color);
+                        return false;
+                    }
+                }
+            }
+            free(queue);
+        }
+    }
+    
+    free(color);
+    return true;
+}
+
+76)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->adjMatrix[u][v] = 1;
+    g->adjMatrix[v][u] = 1;
+}
+
+void dfs(Graph* g, int vertex, bool* visited) {
+    visited[vertex] = true;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+            dfs(g, i, visited);
+        }
+    }
+}
+
+int countConnectedComponents(Graph* g) {
+    bool visited[MAX] = {false};
+    int count = 0;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            count++;
+            dfs(g, i, visited);
+        }
+    }
+    
+    return count;
+}
+
+void printComponents(Graph* g) {
+    bool visited[MAX] = {false};
+    int componentNum = 0;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            componentNum++;
+            printf("Component %d: ", componentNum);
+            
+            // DFS to print component
+            int stack[MAX], top = -1;
+            stack[++top] = i;
+            
+            while(top >= 0) {
+                int vertex = stack[top--];
+                if(!visited[vertex]) {
+                    visited[vertex] = true;
+                    printf("%d ", vertex);
+                    
+                    for(int j = g->vertices - 1; j >= 0; j--) {
+                        if(g->adjMatrix[vertex][j] == 1 && !visited[j]) {
+                            stack[++top] = j;
+                        }
+                    }
+                }
+            }
+            printf("\n");
+        }
+    }
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        addEdge(&g, u, v);
+    }
+    
+    printComponents(&g);
+    printf("Total connected components: %d\n", countConnectedComponents(&g));
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a Node.
+ * struct Node {
+ *     int val;
+ *     int numNeighbors;
+ *     struct Node** neighbors;
+ * };
+ */
+
+struct Node* dfs(struct Node* node, struct Node** visited) {
+    if(node == NULL) return NULL;
+    
+    if(visited[node->val] != NULL) {
+        return visited[node->val];
+    }
+    
+    struct Node* clone = (struct Node*)malloc(sizeof(struct Node));
+    clone->val = node->val;
+    clone->numNeighbors = node->numNeighbors;
+    clone->neighbors = (struct Node**)malloc(node->numNeighbors * sizeof(struct Node*));
+    
+    visited[node->val] = clone;
+    
+    for(int i = 0; i < node->numNeighbors; i++) {
+        clone->neighbors[i] = dfs(node->neighbors[i], visited);
+    }
+    
+    return clone;
+}
+
+struct Node* cloneGraph(struct Node* s) {
+    struct Node** visited = (struct Node**)calloc(101, sizeof(struct Node*));
+    return dfs(s, visited);
+}
+
+77)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->adjMatrix[u][v] = 1;
+    g->adjMatrix[v][u] = 1;
+}
+
+void bfs(Graph* g, int start, bool* visited) {
+    int queue[MAX], front = 0, rear = 0;
+    
+    visited[start] = true;
+    queue[rear++] = start;
+    
+    while(front < rear) {
+        int vertex = queue[front++];
+        
+        for(int i = 0; i < g->vertices; i++) {
+            if(g->adjMatrix[vertex][i] == 1 && !visited[i]) {
+                visited[i] = true;
+                queue[rear++] = i;
+            }
+        }
+    }
+}
+
+bool isConnected(Graph* g) {
+    bool visited[MAX] = {false};
+    
+    bfs(g, 0, visited);
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Find articulation points (Tarjan's algorithm)
+int time = 0;
+void findArticulationPointsUtil(Graph* g, int u, bool* visited, int* disc, int* low, int* parent, bool* ap) {
+    int children = 0;
+    visited[u] = true;
+    disc[u] = low[u] = ++time;
+    
+    for(int v = 0; v < g->vertices; v++) {
+        if(g->adjMatrix[u][v] == 1) {
+            if(!visited[v]) {
+                children++;
+                parent[v] = u;
+                findArticulationPointsUtil(g, v, visited, disc, low, parent, ap);
+                
+                low[u] = (low[u] < low[v]) ? low[u] : low[v];
+                
+                if(parent[u] == -1 && children > 1) {
+                    ap[u] = true;
+                }
+                if(parent[u] != -1 && low[v] >= disc[u]) {
+                    ap[u] = true;
+                }
+            } else if(v != parent[u]) {
+                low[u] = (low[u] < disc[v]) ? low[u] : disc[v];
+            }
+        }
+    }
+}
+
+void findArticulationPoints(Graph* g) {
+    bool visited[MAX] = {false};
+    int disc[MAX], low[MAX], parent[MAX];
+    bool ap[MAX] = {false};
+    
+    for(int i = 0; i < g->vertices; i++) {
+        parent[i] = -1;
+    }
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            findArticulationPointsUtil(g, i, visited, disc, low, parent, ap);
+        }
+    }
+    
+    printf("Articulation Points: ");
+    for(int i = 0; i < g->vertices; i++) {
+        if(ap[i]) {
+            printf("%d ", i);
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        addEdge(&g, u, v);
+    }
+    
+    if(isConnected(&g)) {
+        printf("Graph is connected\n");
+    } else {
+        printf("Graph is NOT connected\n");
+    }
+    
+    findArticulationPoints(&g);
+    
+    return 0;
+}
+
+b) /**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int time = 0;
+
+void dfs(int node, int parent, int** adj, int* adjSize, int* disc, int* low, int** result, int* returnSize, int* visited) {
+    visited[node] = 1;
+    disc[node] = low[node] = ++time;
+    
+    for(int i = 0; i < adjSize[node]; i++) {
+        int neighbor = adj[node][i];
+        
+        if(neighbor == parent) continue;
+        
+        if(!visited[neighbor]) {
+            dfs(neighbor, node, adj, adjSize, disc, low, result, returnSize, visited);
+            low[node] = (low[node] < low[neighbor]) ? low[node] : low[neighbor];
+            
+            if(low[neighbor] > disc[node]) {
+                // Critical connection found
+                result[*returnSize] = (int*)malloc(2 * sizeof(int));
+                result[*returnSize][0] = node;
+                result[*returnSize][1] = neighbor;
+                (*returnSize)++;
+            }
+        } else {
+            low[node] = (low[node] < disc[neighbor]) ? low[node] : disc[neighbor];
+        }
+    }
+}
+
+int** criticalConnections(int n, int** connections, int connectionsSize, int* connectionsColSize, int* returnSize) {
+    // Build adjacency list
+    int** adj = (int**)malloc(n * sizeof(int*));
+    int* adjSize = (int*)calloc(n, sizeof(int));
+    
+    for(int i = 0; i < n; i++) {
+        adj[i] = (int*)malloc(n * sizeof(int));
+    }
+    
+    for(int i = 0; i < connectionsSize; i++) {
+        int u = connections[i][0];
+        int v = connections[i][1];
+        adj[u][adjSize[u]++] = v;
+        adj[v][adjSize[v]++] = u;
+    }
+    
+    int* disc = (int*)calloc(n, sizeof(int));
+    int* low = (int*)calloc(n, sizeof(int));
+    int* visited = (int*)calloc(n, sizeof(int));
+    int** result = (int**)malloc(n * n * sizeof(int*));
+    *returnSize = 0;
+    time = 0;
+    
+    dfs(0, -1, adj, adjSize, disc, low, result, returnSize, visited);
+    
+    // Cleanup
+    for(int i = 0; i < n; i++) {
+        free(adj[i]);
+    }
+    free(adj);
+    free(adjSize);
+    free(disc);
+    free(low);
+    free(visited);
+    
+    return result;
+}
+
+78)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_WORDS 5000
+#define MAX_LEN 10
+
+typedef struct {
+    char word[MAX_LEN];
+    int distance;
+} QueueNode;
+
+bool isAdjacent(char* a, char* b) {
+    int diff = 0;
+    int len = strlen(a);
+    for(int i = 0; i < len; i++) {
+        if(a[i] != b[i]) {
+            diff++;
+            if(diff > 1) return false;
+        }
+    }
+    return diff == 1;
+}
+
+int ladderLength(char* beginWord, char* endWord, char** wordList, int wordListSize) {
+    bool* visited = (bool*)calloc(wordListSize, sizeof(bool));
+    
+    QueueNode queue[MAX_WORDS];
+    int front = 0, rear = 0;
+    
+    strcpy(queue[rear].word, beginWord);
+    queue[rear].distance = 1;
+    rear++;
+    
+    while(front < rear) {
+        QueueNode current = queue[front++];
+        
+        for(int i = 0; i < wordListSize; i++) {
+            if(!visited[i] && isAdjacent(current.word, wordList[i])) {
+                if(strcmp(wordList[i], endWord) == 0) {
+                    free(visited);
+                    return current.distance + 1;
+                }
+                visited[i] = true;
+                strcpy(queue[rear].word, wordList[i]);
+                queue[rear].distance = current.distance + 1;
+                rear++;
+            }
+        }
+    }
+    
+    free(visited);
+    return 0;
+}
+
+int main() {
+    char beginWord[] = "hit";
+    char endWord[] = "cog";
+    char* wordList[] = {"hot", "dot", "dog", "lot", "log", "cog"};
+    int wordListSize = 6;
+    
+    int result = ladderLength(beginWord, endWord, wordList, wordListSize);
+    printf("Shortest transformation length: %d\n", result);
+    
+    return 0;
+}
+
+b) int ladderLength(char* beginWord, char* endWord, char** wordList, int wordListSize) {
+    // Similar implementation as above
+    // Using queue for BFS
+    // Returns minimum number of steps
+}
+
+79)
+
+a) // Already covered in Day 69, here's a review with adjacency list:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct Edge {
+    int dest;
+    int weight;
+    struct Edge* next;
+} Edge;
+
+typedef struct {
+    Edge* head;
+} AdjList;
+
+typedef struct {
+    int vertices;
+    AdjList array[MAX];
+} Graph;
+
+void addEdge(Graph* g, int src, int dest, int weight) {
+    Edge* newEdge = (Edge*)malloc(sizeof(Edge));
+    newEdge->dest = dest;
+    newEdge->weight = weight;
+    newEdge->next = g->array[src].head;
+    g->array[src].head = newEdge;
+}
+
+void dijkstra(Graph* g, int src) {
+    int dist[MAX];
+    bool visited[MAX];
+    int parent[MAX];
+    
+    for(int i = 0; i < g->vertices; i++) {
+        dist[i] = INT_MAX;
+        visited[i] = false;
+        parent[i] = -1;
+    }
+    
+    dist[src] = 0;
+    
+    for(int count = 0; count < g->vertices - 1; count++) {
+        int minDist = INT_MAX, u = -1;
+        for(int i = 0; i < g->vertices; i++) {
+            if(!visited[i] && dist[i] < minDist) {
+                minDist = dist[i];
+                u = i;
+            }
+        }
+        
+        if(u == -1) break;
+        visited[u] = true;
+        
+        Edge* edge = g->array[u].head;
+        while(edge != NULL) {
+            int v = edge->dest;
+            int weight = edge->weight;
+            
+            if(!visited[v] && dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+                parent[v] = u;
+            }
+            edge = edge->next;
+        }
+    }
+    
+    printf("Vertex\tDistance\tPath\n");
+    for(int i = 0; i < g->vertices; i++) {
+        printf("%d\t%d\t\t", i, dist[i]);
+        // Print path...
+        printf("\n");
+    }
+}
+
+b) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int vertices;
+    int adjMatrix[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            g->adjMatrix[i][j] = 0;
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v) {
+    g->adjMatrix[u][v] = 1;
+}
+
+void fillOrder(Graph* g, int v, bool* visited, int* stack, int* stackTop) {
+    visited[v] = true;
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[v][i] == 1 && !visited[i]) {
+            fillOrder(g, i, visited, stack, stackTop);
+        }
+    }
+    
+    stack[++(*stackTop)] = v;
+}
+
+Graph* getTranspose(Graph* g) {
+    Graph* transpose = (Graph*)malloc(sizeof(Graph));
+    initGraph(transpose, g->vertices);
+    
+    for(int i = 0; i < g->vertices; i++) {
+        for(int j = 0; j < g->vertices; j++) {
+            if(g->adjMatrix[i][j] == 1) {
+                transpose->adjMatrix[j][i] = 1;
+            }
+        }
+    }
+    
+    return transpose;
+}
+
+void dfsUtil(Graph* g, int v, bool* visited) {
+    visited[v] = true;
+    printf("%d ", v);
+    
+    for(int i = 0; i < g->vertices; i++) {
+        if(g->adjMatrix[v][i] == 1 && !visited[i]) {
+            dfsUtil(g, i, visited);
+        }
+    }
+}
+
+void kosarajuSCC(Graph* g) {
+    int stack[MAX], stackTop = -1;
+    bool visited[MAX] = {false};
+    
+    // Step 1: Fill vertices in stack according to finish time
+    for(int i = 0; i < g->vertices; i++) {
+        if(!visited[i]) {
+            fillOrder(g, i, visited, stack, &stackTop);
+        }
+    }
+    
+    // Step 2: Get transpose of graph
+    Graph* transpose = getTranspose(g);
+    
+    // Step 3: Process vertices in stack order
+    for(int i = 0; i < g->vertices; i++) {
+        visited[i] = false;
+    }
+    
+    printf("Strongly Connected Components:\n");
+    int componentNum = 0;
+    
+    while(stackTop >= 0) {
+        int v = stack[stackTop--];
+        
+        if(!visited[v]) {
+            componentNum++;
+            printf("Component %d: ", componentNum);
+            dfsUtil(transpose, v, visited);
+            printf("\n");
+        }
+    }
+    
+    free(transpose);
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u -> v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        addEdge(&g, u, v);
+    }
+    
+    kosarajuSCC(&g);
+    
+    return 0;
+}
+
+80)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX 100
+#define INF 99999
+
+typedef struct {
+    int vertices;
+    int dist[MAX][MAX];
+} Graph;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            if(i == j) {
+                g->dist[i][j] = 0;
+            } else {
+                g->dist[i][j] = INF;
+            }
+        }
+    }
+}
+
+void addEdge(Graph* g, int u, int v, int weight) {
+    g->dist[u][v] = weight;
+}
+
+void floydWarshall(Graph* g) {
+    int n = g->vertices;
+    int dist[MAX][MAX];
+    int next[MAX][MAX];
+    
+    // Initialize distance matrix
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            dist[i][j] = g->dist[i][j];
+            if(g->dist[i][j] != INF && i != j) {
+                next[i][j] = j;
+            } else {
+                next[i][j] = -1;
+            }
+        }
+    }
+    
+    // Floyd-Warshall algorithm
+    for(int k = 0; k < n; k++) {
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++) {
+                if(dist[i][k] != INF && dist[k][j] != INF && 
+                   dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                    next[i][j] = next[i][k];
+                }
+            }
+        }
+    }
+    
+    // Check for negative cycles
+    for(int i = 0; i < n; i++) {
+        if(dist[i][i] < 0) {
+            printf("Graph contains negative cycle!\n");
+            return;
+        }
+    }
+    
+    // Print results
+    printf("Shortest distances between all pairs:\n");
+    printf("    ");
+    for(int i = 0; i < n; i++) {
+        printf("%4d ", i);
+    }
+    printf("\n");
+    
+    for(int i = 0; i < n; i++) {
+        printf("%2d: ", i);
+        for(int j = 0; j < n; j++) {
+            if(dist[i][j] == INF) {
+                printf(" INF ");
+            } else {
+                printf("%4d ", dist[i][j]);
+            }
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v, weight;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v weight): ", i + 1);
+        scanf("%d %d %d", &u, &v, &weight);
+        addEdge(&g, u, v, weight);
+    }
+    
+    floydWarshall(&g);
+    
+    return 0;
+}
+
+b) int findTheCity(int n, int** edges, int edgesSize, int* edgesColSize, int distanceThreshold) {
+    // Initialize distance matrix
+    int** dist = (int**)malloc(n * sizeof(int*));
+    for(int i = 0; i < n; i++) {
+        dist[i] = (int*)malloc(n * sizeof(int));
+        for(int j = 0; j < n; j++) {
+            dist[i][j] = (i == j) ? 0 : 10001;  // Large number
+        }
+    }
+    
+    // Set edges
+    for(int i = 0; i < edgesSize; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int w = edges[i][2];
+        dist[u][v] = w;
+        dist[v][u] = w;
+    }
+    
+    // Floyd-Warshall
+    for(int k = 0; k < n; k++) {
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++) {
+                if(dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+    
+    // Count reachable cities within threshold
+    int minCount = n;
+    int bestCity = 0;
+    
+    for(int i = 0; i < n; i++) {
+        int count = 0;
+        for(int j = 0; j < n; j++) {
+            if(i != j && dist[i][j] <= distanceThreshold) {
+                count++;
+            }
+        }
+        if(count <= minCount) {
+            minCount = count;
+            bestCity = i;
+        }
+    }
+    
+    // Cleanup
+    for(int i = 0; i < n; i++) {
+        free(dist[i]);
+    }
+    free(dist);
+    
+    return bestCity;
+}
+
+81)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX 100
+
+typedef struct {
+    int u, v, weight;
+} Edge;
+
+typedef struct {
+    int vertices;
+    int edges;
+    Edge edgeList[MAX];
+} Graph;
+
+typedef struct {
+    int parent[MAX];
+    int rank[MAX];
+} DisjointSet;
+
+void initGraph(Graph* g, int vertices) {
+    g->vertices = vertices;
+    g->edges = 0;
+}
+
+void addEdge(Graph* g, int u, int v, int weight) {
+    g->edgeList[g->edges].u = u;
+    g->edgeList[g->edges].v = v;
+    g->edgeList[g->edges].weight = weight;
+    g->edges++;
+}
+
+int compareEdges(const void* a, const void* b) {
+    return ((Edge*)a)->weight - ((Edge*)b)->weight;
+}
+
+void makeSet(DisjointSet* ds, int n) {
+    for(int i = 0; i < n; i++) {
+        ds->parent[i] = i;
+        ds->rank[i] = 0;
+    }
+}
+
+int find(DisjointSet* ds, int x) {
+    if(ds->parent[x] != x) {
+        ds->parent[x] = find(ds, ds->parent[x]);
+    }
+    return ds->parent[x];
+}
+
+void unionSets(DisjointSet* ds, int x, int y) {
+    int rootX = find(ds, x);
+    int rootY = find(ds, y);
+    
+    if(rootX != rootY) {
+        if(ds->rank[rootX] < ds->rank[rootY]) {
+            ds->parent[rootX] = rootY;
+        } else if(ds->rank[rootX] > ds->rank[rootY]) {
+            ds->parent[rootY] = rootX;
+        } else {
+            ds->parent[rootY] = rootX;
+            ds->rank[rootX]++;
+        }
+    }
+}
+
+void kruskalMST(Graph* g) {
+    // Sort edges by weight
+    qsort(g->edgeList, g->edges, sizeof(Edge), compareEdges);
+    
+    DisjointSet ds;
+    makeSet(&ds, g->vertices);
+    
+    Edge result[MAX];
+    int resultSize = 0;
+    int totalWeight = 0;
+    
+    for(int i = 0; i < g->edges; i++) {
+        int u = g->edgeList[i].u;
+        int v = g->edgeList[i].v;
+        int weight = g->edgeList[i].weight;
+        
+        if(find(&ds, u) != find(&ds, v)) {
+            unionSets(&ds, u, v);
+            result[resultSize++] = g->edgeList[i];
+            totalWeight += weight;
+        }
+    }
+    
+    printf("Minimum Spanning Tree Edges:\n");
+    for(int i = 0; i < resultSize; i++) {
+        printf("%d -- %d == %d\n", result[i].u, result[i].v, result[i].weight);
+    }
+    printf("Total weight: %d\n", totalWeight);
+}
+
+int main() {
+    Graph g;
+    int vertices, edges, u, v, weight;
+    
+    printf("Enter number of vertices: ");
+    scanf("%d", &vertices);
+    initGraph(&g, vertices);
+    
+    printf("Enter number of edges: ");
+    scanf("%d", &edges);
+    
+    for(int i = 0; i < edges; i++) {
+        printf("Edge %d (u v weight): ", i + 1);
+        scanf("%d %d %d", &u, &v, &weight);
+        addEdge(&g, u, v, weight);
+    }
+    
+    kruskalMST(&g);
+    
+    return 0;
+}
+
+b) typedef struct {
+    int u, v, dist;
+} Edge;
+
+int compareEdges(const void* a, const void* b) {
+    return ((Edge*)a)->dist - ((Edge*)b)->dist;
+}
+
+int find(int* parent, int x) {
+    if(parent[x] != x) {
+        parent[x] = find(parent, parent[x]);
+    }
+    return parent[x];
+}
+
+void unionSet(int* parent, int* rank, int x, int y) {
+    int rootX = find(parent, x);
+    int rootY = find(parent, y);
+    
+    if(rootX != rootY) {
+        if(rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if(rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+    }
+}
+
+int minCostConnectPoints(int** points, int pointsSize, int* pointsColSize) {
+    int n = pointsSize;
+    int edgeCount = n * (n - 1) / 2;
+    Edge* edges = (Edge*)malloc(edgeCount * sizeof(Edge));
+    int idx = 0;
+    
+    // Calculate all pairwise distances
+    for(int i = 0; i < n; i++) {
+        for(int j = i + 1; j < n; j++) {
+            edges[idx].u = i;
+            edges[idx].v = j;
+            edges[idx].dist = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1]);
+            idx++;
+        }
+    }
+    
+    qsort(edges, edgeCount, sizeof(Edge), compareEdges);
+    
+    int* parent = (int*)malloc(n * sizeof(int));
+    int* rank = (int*)calloc(n, sizeof(int));
+    for(int i = 0; i < n; i++) {
+        parent[i] = i;
+    }
+    
+    int totalCost = 0;
+    int edgesUsed = 0;
+    
+    for(int i = 0; i < edgeCount && edgesUsed < n - 1; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int dist = edges[i].dist;
+        
+        if(find(parent, u) != find(parent, v)) {
+            unionSet(parent, rank, u, v);
+            totalCost += dist;
+            edgesUsed++;
+        }
+    }
+    
+    free(edges);
+    free(parent);
+    free(rank);
+    
+    return totalCost;
+}
+
+82)
+
+a) #include <stdio.h>
+
+// Lower bound: first index where arr[i] >= target
+int lowerBound(int arr[], int n, int target) {
+    int left = 0, right = n - 1;
+    int result = n;
+    
+    while(left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if(arr[mid] >= target) {
+            result = mid;
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    
+    return result;
+}
+
+// Upper bound: first index where arr[i] > target
+int upperBound(int arr[], int n, int target) {
+    int left = 0, right = n - 1;
+    int result = n;
+    
+    while(left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if(arr[mid] > target) {
+            result = mid;
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    
+    return result;
+}
+
+// Count occurrences of target
+int countOccurrences(int arr[], int n, int target) {
+    int lb = lowerBound(arr, n, target);
+    int ub = upperBound(arr, n, target);
+    return ub - lb;
+}
+
+int main() {
+    int arr[] = {1, 2, 2, 2, 3, 4, 5, 5, 6};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    int target;
+    
+    printf("Array: ");
+    for(int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+    
+    printf("Enter target: ");
+    scanf("%d", &target);
+    
+    int lb = lowerBound(arr, n, target);
+    int ub = upperBound(arr, n, target);
+    int count = countOccurrences(arr, n, target);
+    
+    printf("Lower bound index: %d (arr[%d] = %d)\n", lb, lb, lb < n ? arr[lb] : -1);
+    printf("Upper bound index: %d (arr[%d] = %d)\n", ub, ub, ub < n ? arr[ub] : -1);
+    printf("Count of %d: %d\n", target, count);
+    
+    return 0;
+}
+
+b) int searchInsert(int* nums, int numsSize, int target) {
+    int left = 0, right = numsSize - 1;
+    
+    while(left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if(nums[mid] == target) {
+            return mid;
+        } else if(nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return left;
+}
+
+83)
+
+a) #include <stdio.h>
+
+void selectionSort(int arr[], int n) {
+    for(int i = 0; i < n - 1; i++) {
+        int minIndex = i;
+        
+        for(int j = i + 1; j < n; j++) {
+            if(arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+        
+        if(minIndex != i) {
+            int temp = arr[i];
+            arr[i] = arr[minIndex];
+            arr[minIndex] = temp;
+        }
+        
+        // Print after each pass
+        printf("Pass %d: ", i + 1);
+        for(int k = 0; k < n; k++) {
+            printf("%d ", arr[k]);
+        }
+        printf("\n");
+    }
+}
+
+// Stable selection sort
+void stableSelectionSort(int arr[], int n) {
+    for(int i = 0; i < n - 1; i++) {
+        int minIndex = i;
+        
+        for(int j = i + 1; j < n; j++) {
+            if(arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+        
+        // Shift elements instead of swapping to maintain stability
+        int minValue = arr[minIndex];
+        for(int k = minIndex; k > i; k--) {
+            arr[k] = arr[k - 1];
+        }
+        arr[i] = minValue;
+        
+        printf("Stable Pass %d: ", i + 1);
+        for(int k = 0; k < n; k++) {
+            printf("%d ", arr[k]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int arr[100], n, choice;
+    
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d elements: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    printf("\nChoose sort type:\n");
+    printf("1. Standard Selection Sort\n");
+    printf("2. Stable Selection Sort\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    if(choice == 1) {
+        selectionSort(arr, n);
+    } else {
+        stableSelectionSort(arr, n);
+    }
+    
+    printf("\nSorted array: ");
+    for(int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+    
+    return 0;
+}
+
+b) int search(int* nums, int numsSize, int target) {
+    int left = 0, right = numsSize - 1;
+    
+    while(left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if(nums[mid] == target) {
+            return mid;
+        }
+        
+        // Left half is sorted
+        if(nums[left] <= nums[mid]) {
+            if(nums[left] <= target && target < nums[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        // Right half is sorted
+        else {
+            if(nums[mid] < target && target <= nums[right]) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+    }
+    
+    return -1;
+}
+
+84)
+
+a)#include <stdio.h>
+
+void insertionSort(int arr[], int n) {
+    for(int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        
+        while(j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+        
+        printf("Pass %d: ", i);
+        for(int k = 0; k < n; k++) {
+            printf("%d ", arr[k]);
+        }
+        printf("\n");
+    }
+}
+
+// Binary insertion sort (use binary search to find insertion position)
+int binarySearchForInsertion(int arr[], int val, int low, int high) {
+    while(low <= high) {
+        int mid = low + (high - low) / 2;
+        
+        if(arr[mid] == val) {
+            return mid;
+        } else if(arr[mid] < val) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return low;
+}
+
+void binaryInsertionSort(int arr[], int n) {
+    for(int i = 1; i < n; i++) {
+        int key = arr[i];
+        int pos = binarySearchForInsertion(arr, key, 0, i - 1);
+        
+        // Shift elements
+        for(int j = i - 1; j >= pos; j--) {
+            arr[j + 1] = arr[j];
+        }
+        arr[pos] = key;
+        
+        printf("Binary Pass %d: ", i);
+        for(int k = 0; k < n; k++) {
+            printf("%d ", arr[k]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int arr[100], n, choice;
+    
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d elements: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    printf("\nChoose sort type:\n");
+    printf("1. Standard Insertion Sort\n");
+    printf("2. Binary Insertion Sort\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    if(choice == 1) {
+        insertionSort(arr, n);
+    } else {
+        binaryInsertionSort(arr, n);
+    }
+    
+    printf("\nSorted array: ");
+    for(int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+    
+    return 0;
+}
+
+b) int findPeakElement(int* nums, int numsSize) {
+    int left = 0, right = numsSize - 1;
+    
+    while(left < right) {
+        int mid = left + (right - left) / 2;
+        
+        if(nums[mid] > nums[mid + 1]) {
+            // Peak is on left side (including mid)
+            right = mid;
+        } else {
+            // Peak is on right side
+            left = mid + 1;
+        }
+    }
+    
+    return left;
+}
+
 
  
 
