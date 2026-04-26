@@ -3324,6 +3324,2445 @@ struct ListNode* mergeTwoListsRecursive(struct ListNode* list1, struct ListNode*
 
 32)
 
-a)
+a) #include <stdio.h>
+#include <stdlib.h>
+#define MAX 100
 
+struct Stack {
+    int arr[MAX];
+    int top;
+};
+
+void initStack(struct Stack* s) {
+    s->top = -1;
+}
+
+int isEmpty(struct Stack* s) {
+    return s->top == -1;
+}
+
+int isFull(struct Stack* s) {
+    return s->top == MAX - 1;
+}
+
+void push(struct Stack* s, int value) {
+    if(isFull(s)) {
+        printf("Stack Overflow!\n");
+        return;
+    }
+    s->arr[++(s->top)] = value;
+    printf("Pushed %d\n", value);
+}
+
+int pop(struct Stack* s) {
+    if(isEmpty(s)) {
+        printf("Stack Underflow!\n");
+        return -1;
+    }
+    return s->arr[(s->top)--];
+}
+
+int peek(struct Stack* s) {
+    if(isEmpty(s)) {
+        printf("Stack is empty\n");
+        return -1;
+    }
+    return s->arr[s->top];
+}
+
+void display(struct Stack* s) {
+    if(isEmpty(s)) {
+        printf("Stack is empty\n");
+        return;
+    }
+    printf("Stack: ");
+    for(int i = 0; i <= s->top; i++) {
+        printf("%d ", s->arr[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    struct Stack s;
+    initStack(&s);
+    
+    push(&s, 10);
+    push(&s, 20);
+    push(&s, 30);
+    display(&s);
+    
+    printf("Popped: %d\n", pop(&s));
+    printf("Top element: %d\n", peek(&s));
+    display(&s);
+    
+    return 0;
+}
+
+b) typedef struct {
+    int* stack;
+    int* minStack;
+    int top;
+} MinStack;
+
+MinStack* minStackCreate() {
+    MinStack* obj = (MinStack*)malloc(sizeof(MinStack));
+    obj->stack = (int*)malloc(10000 * sizeof(int));
+    obj->minStack = (int*)malloc(10000 * sizeof(int));
+    obj->top = -1;
+    return obj;
+}
+
+void minStackPush(MinStack* obj, int val) {
+    obj->top++;
+    obj->stack[obj->top] = val;
+    
+    if(obj->top == 0) {
+        obj->minStack[obj->top] = val;
+    } else {
+        obj->minStack[obj->top] = (val < obj->minStack[obj->top - 1]) ? 
+                                   val : obj->minStack[obj->top - 1];
+    }
+}
+
+void minStackPop(MinStack* obj) {
+    if(obj->top >= 0) {
+        obj->top--;
+    }
+}
+
+int minStackTop(MinStack* obj) {
+    return obj->stack[obj->top];
+}
+
+int minStackGetMin(MinStack* obj) {
+    return obj->minStack[obj->top];
+}
+
+void minStackFree(MinStack* obj) {
+    free(obj->stack);
+    free(obj->minStack);
+    free(obj);
+}
+
+33)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX 100
+
+struct Stack {
+    char arr[MAX];
+    int top;
+};
+
+void initStack(struct Stack* s) {
+    s->top = -1;
+}
+
+int isEmpty(struct Stack* s) {
+    return s->top == -1;
+}
+
+int isFull(struct Stack* s) {
+    return s->top == MAX - 1;
+}
+
+void push(struct Stack* s, char ch) {
+    if(!isFull(s)) {
+        s->arr[++(s->top)] = ch;
+    }
+}
+
+char pop(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[(s->top)--];
+    }
+    return '\0';
+}
+
+char peek(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[s->top];
+    }
+    return '\0';
+}
+
+// Function to return precedence of operators
+int precedence(char op) {
+    switch(op) {
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        case '^':
+            return 3;
+        default:
+            return 0;
+    }
+}
+
+// Check if character is an operator
+int isOperator(char ch) {
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^');
+}
+
+// Convert infix expression to postfix
+void infixToPostfix(char* infix, char* postfix) {
+    struct Stack s;
+    initStack(&s);
+    int i = 0, j = 0;
+    
+    while(infix[i] != '\0') {
+        char ch = infix[i];
+        
+        // If operand, add to output
+        if(isalnum(ch)) {
+            postfix[j++] = ch;
+        }
+        // If '(', push to stack
+        else if(ch == '(') {
+            push(&s, ch);
+        }
+        // If ')', pop until '('
+        else if(ch == ')') {
+            while(!isEmpty(&s) && peek(&s) != '(') {
+                postfix[j++] = pop(&s);
+            }
+            pop(&s);  // Remove '('
+        }
+        // If operator
+        else if(isOperator(ch)) {
+            while(!isEmpty(&s) && precedence(peek(&s)) >= precedence(ch) && peek(&s) != '(') {
+                postfix[j++] = pop(&s);
+            }
+            push(&s, ch);
+        }
+        i++;
+    }
+    
+    // Pop remaining operators
+    while(!isEmpty(&s)) {
+        postfix[j++] = pop(&s);
+    }
+    postfix[j] = '\0';
+}
+
+// Evaluate postfix expression
+int evaluatePostfix(char* postfix) {
+    struct Stack s;
+    initStack(&s);
+    int i = 0;
+    
+    while(postfix[i] != '\0') {
+        char ch = postfix[i];
+        
+        if(isdigit(ch)) {
+            push(&s, ch - '0');  // Convert char to int
+        }
+        else if(isOperator(ch)) {
+            int b = pop(&s);
+            int a = pop(&s);
+            int result;
+            
+            switch(ch) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': result = a / b; break;
+                case '^': 
+                    result = 1;
+                    for(int j = 0; j < b; j++) result *= a;
+                    break;
+                default: result = 0;
+            }
+            push(&s, result);
+        }
+        i++;
+    }
+    
+    return pop(&s);
+}
+
+int main() {
+    char infix[MAX], postfix[MAX];
+    int choice;
+    
+    printf("Choose operation:\n");
+    printf("1. Infix to Postfix Conversion\n");
+    printf("2. Evaluate Postfix Expression\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    getchar();  // Consume newline
+    
+    if(choice == 1) {
+        printf("Enter infix expression: ");
+        fgets(infix, MAX, stdin);
+        infix[strcspn(infix, "\n")] = '\0';
+        
+        infixToPostfix(infix, postfix);
+        printf("Postfix expression: %s\n", postfix);
+    }
+    else if(choice == 2) {
+        printf("Enter postfix expression (single digits): ");
+        fgets(postfix, MAX, stdin);
+        postfix[strcspn(postfix, "\n")] = '\0';
+        
+        int result = evaluatePostfix(postfix);
+        printf("Result: %d\n", result);
+    }
+    
+    return 0;
+}
+
+b) #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+// Stack implementation
+typedef struct {
+    int* arr;
+    int top;
+    int capacity;
+} Stack;
+
+Stack* createStack(int capacity) {
+    Stack* s = (Stack*)malloc(sizeof(Stack));
+    s->arr = (int*)malloc(capacity * sizeof(int));
+    s->top = -1;
+    s->capacity = capacity;
+    return s;
+}
+
+void push(Stack* s, int val) {
+    if(s->top < s->capacity - 1) {
+        s->arr[++(s->top)] = val;
+    }
+}
+
+int pop(Stack* s) {
+    if(s->top >= 0) {
+        return s->arr[(s->top)--];
+    }
+    return 0;
+}
+
+int evalRPN(char** tokens, int tokensSize) {
+    Stack* s = createStack(tokensSize);
+    
+    for(int i = 0; i < tokensSize; i++) {
+        char* token = tokens[i];
+        
+        // Check if token is an operator
+        if(strlen(token) == 1 && (token[0] == '+' || token[0] == '-' || 
+           token[0] == '*' || token[0] == '/')) {
+            int b = pop(s);
+            int a = pop(s);
+            int result;
+            
+            switch(token[0]) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': result = a / b; break;
+                default: result = 0;
+            }
+            push(s, result);
+        } else {
+            // Token is a number
+            push(s, atoi(token));
+        }
+    }
+    
+    int answer = pop(s);
+    free(s->arr);
+    free(s);
+    return answer;
+}
+
+// Test function
+int main() {
+    char* tokens1[] = {"2", "1", "+", "3", "*"};
+    int size1 = 5;
+    printf("Test 1: 2 1 + 3 * = %d\n", evalRPN(tokens1, size1));  // (2+1)*3 = 9
+    
+    char* tokens2[] = {"4", "13", "5", "/", "+"};
+    int size2 = 5;
+    printf("Test 2: 4 13 5 / + = %d\n", evalRPN(tokens2, size2));  // 4 + (13/5) = 6
+    
+    char* tokens3[] = {"10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"};
+    int size3 = 13;
+    printf("Test 3: %d\n", evalRPN(tokens3, size3));
+    
+    return 0;
+}
+
+34)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX 100
+
+struct Stack {
+    char arr[MAX];
+    int top;
+};
+
+void initStack(struct Stack* s) {
+    s->top = -1;
+}
+
+int isEmpty(struct Stack* s) {
+    return s->top == -1;
+}
+
+void push(struct Stack* s, char ch) {
+    if(s->top < MAX - 1) {
+        s->arr[++(s->top)] = ch;
+    }
+}
+
+char pop(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[(s->top)--];
+    }
+    return '\0';
+}
+
+char peek(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[s->top];
+    }
+    return '\0';
+}
+
+int precedence(char op) {
+    switch(op) {
+        case '+': case '-': return 1;
+        case '*': case '/': return 2;
+        case '^': return 3;
+        default: return 0;
+    }
+}
+
+int isOperator(char ch) {
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^');
+}
+
+void reverseString(char* str) {
+    int n = strlen(str);
+    for(int i = 0; i < n / 2; i++) {
+        char temp = str[i];
+        str[i] = str[n - 1 - i];
+        str[n - 1 - i] = temp;
+    }
+}
+
+void replaceBrackets(char* str) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(str[i] == '(') str[i] = ')';
+        else if(str[i] == ')') str[i] = '(';
+    }
+}
+
+void infixToPrefix(char* infix, char* prefix) {
+    // Step 1: Reverse the infix expression
+    char reversed[MAX];
+    strcpy(reversed, infix);
+    reverseString(reversed);
+    
+    // Step 2: Replace brackets
+    replaceBrackets(reversed);
+    
+    // Step 3: Convert to postfix using the same algorithm
+    struct Stack s;
+    initStack(&s);
+    char postfix[MAX];
+    int i = 0, j = 0;
+    
+    while(reversed[i] != '\0') {
+        char ch = reversed[i];
+        
+        if(isalnum(ch)) {
+            postfix[j++] = ch;
+        }
+        else if(ch == '(') {
+            push(&s, ch);
+        }
+        else if(ch == ')') {
+            while(!isEmpty(&s) && peek(&s) != '(') {
+                postfix[j++] = pop(&s);
+            }
+            pop(&s);
+        }
+        else if(isOperator(ch)) {
+            while(!isEmpty(&s) && precedence(peek(&s)) > precedence(ch)) {
+                postfix[j++] = pop(&s);
+            }
+            push(&s, ch);
+        }
+        i++;
+    }
+    
+    while(!isEmpty(&s)) {
+        postfix[j++] = pop(&s);
+    }
+    postfix[j] = '\0';
+    
+    // Step 4: Reverse to get prefix
+    strcpy(prefix, postfix);
+    reverseString(prefix);
+}
+
+int main() {
+    char infix[MAX], prefix[MAX];
+    
+    printf("Enter infix expression: ");
+    fgets(infix, MAX, stdin);
+    infix[strcspn(infix, "\n")] = '\0';
+    
+    infixToPrefix(infix, prefix);
+    printf("Prefix expression: %s\n", prefix);
+    
+    return 0;
+}
+
+b) #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+int calculate(char* s) {
+    int stack[10000];
+    int top = -1;
+    int currentNum = 0;
+    int result = 0;
+    int sign = 1;  // 1 for positive, -1 for negative
+    
+    for(int i = 0; s[i] != '\0'; i++) {
+        char ch = s[i];
+        
+        if(isdigit(ch)) {
+            currentNum = currentNum * 10 + (ch - '0');
+        }
+        else if(ch == '+' || ch == '-') {
+            result += sign * currentNum;
+            currentNum = 0;
+            sign = (ch == '+') ? 1 : -1;
+        }
+        else if(ch == '(') {
+            // Push result and sign to stack
+            stack[++top] = result;
+            stack[++top] = sign;
+            // Reset for new expression
+            result = 0;
+            sign = 1;
+        }
+        else if(ch == ')') {
+            result += sign * currentNum;
+            currentNum = 0;
+            // Pop sign and previous result
+            int prevSign = stack[top--];
+            int prevResult = stack[top--];
+            result = prevResult + prevSign * result;
+        }
+    }
+    
+    result += sign * currentNum;
+    return result;
+}
+
+int main() {
+    char expr[1000];
+    printf("Enter expression (spaces allowed): ");
+    fgets(expr, 1000, stdin);
+    
+    int result = calculate(expr);
+    printf("Result: %d\n", result);
+    
+    return 0;
+}
+
+35)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+struct Stack {
+    char arr[MAX];
+    int top;
+};
+
+void initStack(struct Stack* s) {
+    s->top = -1;
+}
+
+bool isEmpty(struct Stack* s) {
+    return s->top == -1;
+}
+
+bool isFull(struct Stack* s) {
+    return s->top == MAX - 1;
+}
+
+void push(struct Stack* s, char ch) {
+    if(!isFull(s)) {
+        s->arr[++(s->top)] = ch;
+    }
+}
+
+char pop(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[(s->top)--];
+    }
+    return '\0';
+}
+
+char peek(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[s->top];
+    }
+    return '\0';
+}
+
+bool isMatchingPair(char opening, char closing) {
+    return (opening == '(' && closing == ')') ||
+           (opening == '{' && closing == '}') ||
+           (opening == '[' && closing == ']');
+}
+
+bool isBalanced(char* expression) {
+    struct Stack s;
+    initStack(&s);
+    
+    for(int i = 0; expression[i] != '\0'; i++) {
+        char ch = expression[i];
+        
+        // If opening bracket, push to stack
+        if(ch == '(' || ch == '{' || ch == '[') {
+            push(&s, ch);
+        }
+        // If closing bracket, check with stack top
+        else if(ch == ')' || ch == '}' || ch == ']') {
+            if(isEmpty(&s)) {
+                return false;
+            }
+            char top = pop(&s);
+            if(!isMatchingPair(top, ch)) {
+                return false;
+            }
+        }
+        // Ignore other characters (optional)
+    }
+    
+    return isEmpty(&s);
+}
+
+int main() {
+    char expression[MAX];
+    
+    printf("Enter expression with brackets: ");
+    fgets(expression, MAX, stdin);
+    expression[strcspn(expression, "\n")] = '\0';
+    
+    if(isBalanced(expression)) {
+        printf("Balanced Parentheses!\n");
+    } else {
+        printf("Unbalanced Parentheses!\n");
+    }
+    
+    return 0;
+}
+
+b) #include <stdbool.h>
+#include <string.h>
+
+bool isValid(char* s) {
+    char stack[10000];
+    int top = -1;
+    
+    for(int i = 0; s[i] != '\0'; i++) {
+        char ch = s[i];
+        
+        if(ch == '(' || ch == '{' || ch == '[') {
+            stack[++top] = ch;
+        } else {
+            if(top == -1) return false;
+            
+            char topChar = stack[top--];
+            
+            if(ch == ')' && topChar != '(') return false;
+            if(ch == '}' && topChar != '{') return false;
+            if(ch == ']' && topChar != '[') return false;
+        }
+    }
+    
+    return top == -1;
+}
+
+36)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+struct Stack {
+    int arr[MAX];
+    int top;
+};
+
+void initStack(struct Stack* s) {
+    s->top = -1;
+}
+
+int isEmpty(struct Stack* s) {
+    return s->top == -1;
+}
+
+void push(struct Stack* s, int val) {
+    if(s->top < MAX - 1) {
+        s->arr[++(s->top)] = val;
+    }
+}
+
+int pop(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[(s->top)--];
+    }
+    return -1;
+}
+
+int peek(struct Stack* s) {
+    if(!isEmpty(s)) {
+        return s->arr[s->top];
+    }
+    return -1;
+}
+
+// Next Greater Element to the Right
+void nextGreaterElement(int arr[], int n) {
+    struct Stack s;
+    initStack(&s);
+    int result[MAX];
+    
+    // Traverse from right to left
+    for(int i = n - 1; i >= 0; i--) {
+        // Pop elements smaller than current
+        while(!isEmpty(&s) && peek(&s) <= arr[i]) {
+            pop(&s);
+        }
+        
+        // If stack is empty, no greater element
+        if(isEmpty(&s)) {
+            result[i] = -1;
+        } else {
+            result[i] = peek(&s);
+        }
+        
+        push(&s, arr[i]);
+    }
+    
+    // Print results
+    printf("Element -> Next Greater Element\n");
+    for(int i = 0; i < n; i++) {
+        printf("    %d   ->        %d\n", arr[i], result[i]);
+    }
+}
+
+// Next Greater Element to the Left
+void nextGreaterLeft(int arr[], int n) {
+    struct Stack s;
+    initStack(&s);
+    int result[MAX];
+    
+    for(int i = 0; i < n; i++) {
+        while(!isEmpty(&s) && peek(&s) <= arr[i]) {
+            pop(&s);
+        }
+        
+        if(isEmpty(&s)) {
+            result[i] = -1;
+        } else {
+            result[i] = peek(&s);
+        }
+        
+        push(&s, arr[i]);
+    }
+    
+    printf("Element -> Next Greater Left\n");
+    for(int i = 0; i < n; i++) {
+        printf("    %d   ->        %d\n", arr[i], result[i]);
+    }
+}
+
+int main() {
+    int arr[MAX], n, choice;
+    
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d elements: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    printf("\nChoose operation:\n");
+    printf("1. Next Greater Element (Right)\n");
+    printf("2. Next Greater Element (Left)\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    if(choice == 1) {
+        nextGreaterElement(arr, n);
+    } else {
+        nextGreaterLeft(arr, n);
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* nextGreaterElement(int* nums1, int nums1Size, int* nums2, int nums2Size, int* returnSize) {
+    // Stack to find next greater for all elements in nums2
+    int stack[10000];
+    int top = -1;
+    
+    // Hash map to store next greater for each value
+    int map[10001];  // Assuming values are within range
+    for(int i = 0; i < 10001; i++) {
+        map[i] = -1;
+    }
+    
+    // Find next greater for all elements in nums2
+    for(int i = 0; i < nums2Size; i++) {
+        while(top != -1 && stack[top] < nums2[i]) {
+            map[stack[top]] = nums2[i];
+            top--;
+        }
+        stack[++top] = nums2[i];
+    }
+    
+    // Prepare result for nums1
+    int* result = (int*)malloc(nums1Size * sizeof(int));
+    *returnSize = nums1Size;
+    
+    for(int i = 0; i < nums1Size; i++) {
+        result[i] = map[nums1[i]];
+    }
+    
+    return result;
+}
+
+37)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX 100
+
+typedef struct {
+    int data;
+    int priority;
+} Element;
+
+typedef struct {
+    Element arr[MAX];
+    int size;
+} PriorityQueue;
+
+// Initialize priority queue
+void initQueue(PriorityQueue* pq) {
+    pq->size = 0;
+}
+
+// Check if queue is empty
+int isEmpty(PriorityQueue* pq) {
+    return pq->size == 0;
+}
+
+// Check if queue is full
+int isFull(PriorityQueue* pq) {
+    return pq->size == MAX;
+}
+
+// Insert element with priority (higher priority number = higher priority)
+void enqueue(PriorityQueue* pq, int data, int priority) {
+    if(isFull(pq)) {
+        printf("Priority Queue is full!\n");
+        return;
+    }
+    
+    Element newElement;
+    newElement.data = data;
+    newElement.priority = priority;
+    
+    int i = pq->size - 1;
+    
+    // Shift elements with lower priority to the right
+    while(i >= 0 && pq->arr[i].priority < priority) {
+        pq->arr[i + 1] = pq->arr[i];
+        i--;
+    }
+    
+    pq->arr[i + 1] = newElement;
+    pq->size++;
+    
+    printf("Inserted: %d (Priority: %d)\n", data, priority);
+}
+
+// Remove and return highest priority element
+int dequeue(PriorityQueue* pq) {
+    if(isEmpty(pq)) {
+        printf("Priority Queue is empty!\n");
+        return -1;
+    }
+    
+    int data = pq->arr[0].data;
+    
+    // Shift all elements left
+    for(int i = 0; i < pq->size - 1; i++) {
+        pq->arr[i] = pq->arr[i + 1];
+    }
+    pq->size--;
+    
+    return data;
+}
+
+// Peek at highest priority element
+int peek(PriorityQueue* pq) {
+    if(isEmpty(pq)) {
+        printf("Priority Queue is empty!\n");
+        return -1;
+    }
+    return pq->arr[0].data;
+}
+
+// Display the priority queue
+void display(PriorityQueue* pq) {
+    if(isEmpty(pq)) {
+        printf("Priority Queue is empty\n");
+        return;
+    }
+    
+    printf("Priority Queue (Data, Priority): ");
+    for(int i = 0; i < pq->size; i++) {
+        printf("(%d,%d) ", pq->arr[i].data, pq->arr[i].priority);
+    }
+    printf("\n");
+}
+
+int main() {
+    PriorityQueue pq;
+    initQueue(&pq);
+    int choice, data, priority;
+    
+    while(1) {
+        printf("\n--- Priority Queue Menu ---\n");
+        printf("1. Enqueue (Insert)\n");
+        printf("2. Dequeue (Remove Highest Priority)\n");
+        printf("3. Peek (View Highest Priority)\n");
+        printf("4. Display\n");
+        printf("5. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+        
+        switch(choice) {
+            case 1:
+                printf("Enter data: ");
+                scanf("%d", &data);
+                printf("Enter priority (higher = more important): ");
+                scanf("%d", &priority);
+                enqueue(&pq, data, priority);
+                break;
+            case 2:
+                data = dequeue(&pq);
+                if(data != -1) {
+                    printf("Dequeued: %d\n", data);
+                }
+                break;
+            case 3:
+                data = peek(&pq);
+                if(data != -1) {
+                    printf("Highest priority element: %d\n", data);
+                }
+                break;
+            case 4:
+                display(&pq);
+                break;
+            case 5:
+                printf("Exiting...\n");
+                return 0;
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+    
+    return 0;
+}
+
+b) #include <stdio.h>
+#include <stdlib.h>
+
+// Min-Heap implementation
+typedef struct {
+    int* heap;
+    int size;
+    int capacity;
+    int k;
+} KthLargest;
+
+// Swap two integers
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Heapify down (min-heap property)
+void heapifyDown(int* heap, int size, int idx) {
+    int smallest = idx;
+    int left = 2 * idx + 1;
+    int right = 2 * idx + 2;
+    
+    if(left < size && heap[left] < heap[smallest]) {
+        smallest = left;
+    }
+    if(right < size && heap[right] < heap[smallest]) {
+        smallest = right;
+    }
+    
+    if(smallest != idx) {
+        swap(&heap[idx], &heap[smallest]);
+        heapifyDown(heap, size, smallest);
+    }
+}
+
+// Heapify up (min-heap property)
+void heapifyUp(int* heap, int idx) {
+    if(idx == 0) return;
+    
+    int parent = (idx - 1) / 2;
+    
+    if(heap[parent] > heap[idx]) {
+        swap(&heap[parent], &heap[idx]);
+        heapifyUp(heap, parent);
+    }
+}
+
+// Create KthLargest object
+KthLargest* kthLargestCreate(int k, int* nums, int numsSize) {
+    KthLargest* obj = (KthLargest*)malloc(sizeof(KthLargest));
+    obj->k = k;
+    obj->size = 0;
+    obj->capacity = k + 10;
+    obj->heap = (int*)malloc(obj->capacity * sizeof(int));
+    
+    // Add all elements
+    for(int i = 0; i < numsSize; i++) {
+        kthLargestAdd(obj, nums[i]);
+    }
+    
+    return obj;
+}
+
+// Add value and return kth largest
+int kthLargestAdd(KthLargest* obj, int val) {
+    if(obj->size < obj->k) {
+        // Heap not full yet, just insert
+        obj->heap[obj->size] = val;
+        heapifyUp(obj->heap, obj->size);
+        obj->size++;
+    } else if(val > obj->heap[0]) {
+        // Replace root and heapify
+        obj->heap[0] = val;
+        heapifyDown(obj->heap, obj->size, 0);
+    }
+    
+    return obj->heap[0];
+}
+
+// Free memory
+void kthLargestFree(KthLargest* obj) {
+    free(obj->heap);
+    free(obj);
+}
+
+// Test the implementation
+int main() {
+    int nums[] = {4, 5, 8, 2};
+    int numsSize = 4;
+    int k = 3;
+    
+    KthLargest* obj = kthLargestCreate(k, nums, numsSize);
+    
+    printf("Kth largest (k=%d) after adding:\n", k);
+    printf("Add 3 -> %d\n", kthLargestAdd(obj, 3));
+    printf("Add 5 -> %d\n", kthLargestAdd(obj, 5));
+    printf("Add 10 -> %d\n", kthLargestAdd(obj, 10));
+    printf("Add 9 -> %d\n", kthLargestAdd(obj, 9));
+    printf("Add 4 -> %d\n", kthLargestAdd(obj, 4));
+    
+    kthLargestFree(obj);
+    return 0;
+}
+
+38)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 5
+
+typedef struct {
+    int arr[MAX];
+    int front;
+    int rear;
+    int size;
+} Queue;
+
+// Initialize queue
+void initQueue(Queue* q) {
+    q->front = 0;
+    q->rear = -1;
+    q->size = 0;
+}
+
+// Check if queue is empty
+bool isEmpty(Queue* q) {
+    return q->size == 0;
+}
+
+// Check if queue is full
+bool isFull(Queue* q) {
+    return q->size == MAX;
+}
+
+// Enqueue (add element to rear)
+void enqueue(Queue* q, int val) {
+    if(isFull(q)) {
+        printf("Queue is full! Cannot enqueue %d\n", val);
+        return;
+    }
+    
+    q->rear = (q->rear + 1) % MAX;
+    q->arr[q->rear] = val;
+    q->size++;
+    printf("Enqueued: %d\n", val);
+}
+
+// Dequeue (remove element from front)
+int dequeue(Queue* q) {
+    if(isEmpty(q)) {
+        printf("Queue is empty!\n");
+        return -1;
+    }
+    
+    int val = q->arr[q->front];
+    q->front = (q->front + 1) % MAX;
+    q->size--;
+    return val;
+}
+
+// Peek at front element
+int peek(Queue* q) {
+    if(isEmpty(q)) {
+        printf("Queue is empty!\n");
+        return -1;
+    }
+    return q->arr[q->front];
+}
+
+// Display queue
+void display(Queue* q) {
+    if(isEmpty(q)) {
+        printf("Queue is empty\n");
+        return;
+    }
+    
+    printf("Queue (front to rear): ");
+    for(int i = 0; i < q->size; i++) {
+        int idx = (q->front + i) % MAX;
+        printf("%d ", q->arr[idx]);
+    }
+    printf("\n");
+}
+
+int main() {
+    Queue q;
+    initQueue(&q);
+    int choice, val;
+    
+    while(1) {
+        printf("\n--- Queue Menu ---\n");
+        printf("1. Enqueue\n");
+        printf("2. Dequeue\n");
+        printf("3. Peek\n");
+        printf("4. Display\n");
+        printf("5. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+        
+        switch(choice) {
+            case 1:
+                printf("Enter value: ");
+                scanf("%d", &val);
+                enqueue(&q, val);
+                break;
+            case 2:
+                val = dequeue(&q);
+                if(val != -1) {
+                    printf("Dequeued: %d\n", val);
+                }
+                break;
+            case 3:
+                val = peek(&q);
+                if(val != -1) {
+                    printf("Front element: %d\n", val);
+                }
+                break;
+            case 4:
+                display(&q);
+                break;
+            case 5:
+                printf("Exiting...\n");
+                return 0;
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+    
+    return 0;
+}
+
+b) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+typedef struct {
+    int* stack1;  // For push operations
+    int* stack2;  // For pop/peek operations
+    int top1;
+    int top2;
+    int capacity;
+} MyQueue;
+
+MyQueue* myQueueCreate() {
+    MyQueue* obj = (MyQueue*)malloc(sizeof(MyQueue));
+    obj->capacity = 10000;
+    obj->stack1 = (int*)malloc(obj->capacity * sizeof(int));
+    obj->stack2 = (int*)malloc(obj->capacity * sizeof(int));
+    obj->top1 = -1;
+    obj->top2 = -1;
+    return obj;
+}
+
+void myQueuePush(MyQueue* obj, int x) {
+    obj->stack1[++(obj->top1)] = x;
+}
+
+int myQueuePop(MyQueue* obj) {
+    // If stack2 is empty, transfer all elements from stack1
+    if(obj->top2 == -1) {
+        while(obj->top1 != -1) {
+            obj->stack2[++(obj->top2)] = obj->stack1[(obj->top1)--];
+        }
+    }
+    return obj->stack2[(obj->top2)--];
+}
+
+int myQueuePeek(MyQueue* obj) {
+    if(obj->top2 == -1) {
+        while(obj->top1 != -1) {
+            obj->stack2[++(obj->top2)] = obj->stack1[(obj->top1)--];
+        }
+    }
+    return obj->stack2[obj->top2];
+}
+
+bool myQueueEmpty(MyQueue* obj) {
+    return (obj->top1 == -1 && obj->top2 == -1);
+}
+
+void myQueueFree(MyQueue* obj) {
+    free(obj->stack1);
+    free(obj->stack2);
+    free(obj);
+}
+
+39)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+typedef struct {
+    int arr[MAX];
+    int front;
+    int rear;
+    int size;
+} Deque;
+
+void initDeque(Deque* dq) {
+    dq->front = -1;
+    dq->rear = 0;
+    dq->size = 0;
+}
+
+bool isEmpty(Deque* dq) {
+    return dq->size == 0;
+}
+
+bool isFull(Deque* dq) {
+    return dq->size == MAX;
+}
+
+// Insert at front
+void insertFront(Deque* dq, int val) {
+    if(isFull(dq)) {
+        printf("Deque is full!\n");
+        return;
+    }
+    
+    if(isEmpty(dq)) {
+        dq->front = 0;
+        dq->rear = 0;
+    } else {
+        dq->front = (dq->front - 1 + MAX) % MAX;
+    }
+    
+    dq->arr[dq->front] = val;
+    dq->size++;
+    printf("Inserted %d at front\n", val);
+}
+
+// Insert at rear
+void insertRear(Deque* dq, int val) {
+    if(isFull(dq)) {
+        printf("Deque is full!\n");
+        return;
+    }
+    
+    if(isEmpty(dq)) {
+        dq->front = 0;
+        dq->rear = 0;
+    } else {
+        dq->rear = (dq->rear + 1) % MAX;
+    }
+    
+    dq->arr[dq->rear] = val;
+    dq->size++;
+    printf("Inserted %d at rear\n", val);
+}
+
+// Delete from front
+int deleteFront(Deque* dq) {
+    if(isEmpty(dq)) {
+        printf("Deque is empty!\n");
+        return -1;
+    }
+    
+    int val = dq->arr[dq->front];
+    
+    if(dq->front == dq->rear) {
+        // Only one element
+        dq->front = -1;
+        dq->rear = -1;
+    } else {
+        dq->front = (dq->front + 1) % MAX;
+    }
+    
+    dq->size--;
+    return val;
+}
+
+// Delete from rear
+int deleteRear(Deque* dq) {
+    if(isEmpty(dq)) {
+        printf("Deque is empty!\n");
+        return -1;
+    }
+    
+    int val = dq->arr[dq->rear];
+    
+    if(dq->front == dq->rear) {
+        dq->front = -1;
+        dq->rear = -1;
+    } else {
+        dq->rear = (dq->rear - 1 + MAX) % MAX;
+    }
+    
+    dq->size--;
+    return val;
+}
+
+int getFront(Deque* dq) {
+    if(isEmpty(dq)) return -1;
+    return dq->arr[dq->front];
+}
+
+int getRear(Deque* dq) {
+    if(isEmpty(dq)) return -1;
+    return dq->arr[dq->rear];
+}
+
+void display(Deque* dq) {
+    if(isEmpty(dq)) {
+        printf("Deque is empty\n");
+        return;
+    }
+    
+    printf("Deque (front to rear): ");
+    int i = dq->front;
+    while(1) {
+        printf("%d ", dq->arr[i]);
+        if(i == dq->rear) break;
+        i = (i + 1) % MAX;
+    }
+    printf("\n");
+}
+
+int main() {
+    Deque dq;
+    initDeque(&dq);
+    int choice, val;
+    
+    while(1) {
+        printf("\n--- Deque Menu ---\n");
+        printf("1. Insert Front\n");
+        printf("2. Insert Rear\n");
+        printf("3. Delete Front\n");
+        printf("4. Delete Rear\n");
+        printf("5. Get Front\n");
+        printf("6. Get Rear\n");
+        printf("7. Display\n");
+        printf("8. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+        
+        switch(choice) {
+            case 1:
+                printf("Enter value: ");
+                scanf("%d", &val);
+                insertFront(&dq, val);
+                break;
+            case 2:
+                printf("Enter value: ");
+                scanf("%d", &val);
+                insertRear(&dq, val);
+                break;
+            case 3:
+                val = deleteFront(&dq);
+                if(val != -1) printf("Deleted from front: %d\n", val);
+                break;
+            case 4:
+                val = deleteRear(&dq);
+                if(val != -1) printf("Deleted from rear: %d\n", val);
+                break;
+            case 5:
+                val = getFront(&dq);
+                if(val != -1) printf("Front element: %d\n", val);
+                break;
+            case 6:
+                val = getRear(&dq);
+                if(val != -1) printf("Rear element: %d\n", val);
+                break;
+            case 7:
+                display(&dq);
+                break;
+            case 8:
+                printf("Exiting...\n");
+                return 0;
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+    
+    return 0;
+}
+
+b) typedef struct {
+    int* arr;
+    int front;
+    int rear;
+    int size;
+    int capacity;
+} MyCircularDeque;
+
+MyCircularDeque* myCircularDequeCreate(int k) {
+    MyCircularDeque* obj = (MyCircularDeque*)malloc(sizeof(MyCircularDeque));
+    obj->arr = (int*)malloc(k * sizeof(int));
+    obj->front = -1;
+    obj->rear = -1;
+    obj->size = 0;
+    obj->capacity = k;
+    return obj;
+}
+
+bool myCircularDequeIsEmpty(MyCircularDeque* obj) {
+    return obj->size == 0;
+}
+
+bool myCircularDequeIsFull(MyCircularDeque* obj) {
+    return obj->size == obj->capacity;
+}
+
+bool myCircularDequeInsertFront(MyCircularDeque* obj, int value) {
+    if(myCircularDequeIsFull(obj)) return false;
+    
+    if(myCircularDequeIsEmpty(obj)) {
+        obj->front = 0;
+        obj->rear = 0;
+    } else {
+        obj->front = (obj->front - 1 + obj->capacity) % obj->capacity;
+    }
+    
+    obj->arr[obj->front] = value;
+    obj->size++;
+    return true;
+}
+
+bool myCircularDequeInsertLast(MyCircularDeque* obj, int value) {
+    if(myCircularDequeIsFull(obj)) return false;
+    
+    if(myCircularDequeIsEmpty(obj)) {
+        obj->front = 0;
+        obj->rear = 0;
+    } else {
+        obj->rear = (obj->rear + 1) % obj->capacity;
+    }
+    
+    obj->arr[obj->rear] = value;
+    obj->size++;
+    return true;
+}
+
+bool myCircularDequeDeleteFront(MyCircularDeque* obj) {
+    if(myCircularDequeIsEmpty(obj)) return false;
+    
+    if(obj->front == obj->rear) {
+        obj->front = -1;
+        obj->rear = -1;
+    } else {
+        obj->front = (obj->front + 1) % obj->capacity;
+    }
+    
+    obj->size--;
+    return true;
+}
+
+bool myCircularDequeDeleteLast(MyCircularDeque* obj) {
+    if(myCircularDequeIsEmpty(obj)) return false;
+    
+    if(obj->front == obj->rear) {
+        obj->front = -1;
+        obj->rear = -1;
+    } else {
+        obj->rear = (obj->rear - 1 + obj->capacity) % obj->capacity;
+    }
+    
+    obj->size--;
+    return true;
+}
+
+int myCircularDequeGetFront(MyCircularDeque* obj) {
+    if(myCircularDequeIsEmpty(obj)) return -1;
+    return obj->arr[obj->front];
+}
+
+int myCircularDequeGetRear(MyCircularDeque* obj) {
+    if(myCircularDequeIsEmpty(obj)) return -1;
+    return obj->arr[obj->rear];
+}
+
+void myCircularDequeFree(MyCircularDeque* obj) {
+    free(obj->arr);
+    free(obj);
+}
+
+40)
+
+a) #include <stdio.h>
+
+// Swap two elements
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Heapify a subtree rooted at index i
+void heapify(int arr[], int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    
+    if(left < n && arr[left] > arr[largest]) {
+        largest = left;
+    }
+    if(right < n && arr[right] > arr[largest]) {
+        largest = right;
+    }
+    
+    if(largest != i) {
+        swap(&arr[i], &arr[largest]);
+        heapify(arr, n, largest);
+    }
+}
+
+// Build max heap and sort
+void heapSort(int arr[], int n) {
+    // Build max heap (rearrange array)
+    for(int i = n / 2 - 1; i >= 0; i--) {
+        heapify(arr, n, i);
+    }
+    
+    // Extract elements from heap one by one
+    for(int i = n - 1; i > 0; i--) {
+        // Move current root to end
+        swap(&arr[0], &arr[i]);
+        
+        // Call heapify on reduced heap
+        heapify(arr, i, 0);
+    }
+}
+
+// Build min heap (for descending order)
+void heapifyMin(int arr[], int n, int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    
+    if(left < n && arr[left] < arr[smallest]) {
+        smallest = left;
+    }
+    if(right < n && arr[right] < arr[smallest]) {
+        smallest = right;
+    }
+    
+    if(smallest != i) {
+        swap(&arr[i], &arr[smallest]);
+        heapifyMin(arr, n, smallest);
+    }
+}
+
+void heapSortDescending(int arr[], int n) {
+    for(int i = n / 2 - 1; i >= 0; i--) {
+        heapifyMin(arr, n, i);
+    }
+    
+    for(int i = n - 1; i > 0; i--) {
+        swap(&arr[0], &arr[i]);
+        heapifyMin(arr, i, 0);
+    }
+}
+
+void printArray(int arr[], int n) {
+    for(int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    int arr[100], n, choice;
+    
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d elements: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    printf("\nChoose sorting order:\n");
+    printf("1. Ascending (Max Heap)\n");
+    printf("2. Descending (Min Heap)\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    printf("Original array: ");
+    printArray(arr, n);
+    
+    if(choice == 1) {
+        heapSort(arr, n);
+        printf("Sorted ascending: ");
+    } else {
+        heapSortDescending(arr, n);
+        printf("Sorted descending: ");
+    }
+    printArray(arr, n);
+    
+    return 0;
+}
+
+b) /**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* dailyTemperatures(int* temperatures, int temperaturesSize, int* returnSize) {
+    int* result = (int*)malloc(temperaturesSize * sizeof(int));
+    *returnSize = temperaturesSize;
+    
+    int* stack = (int*)malloc(temperaturesSize * sizeof(int));
+    int top = -1;
+    
+    for(int i = 0; i < temperaturesSize; i++) {
+        result[i] = 0;
+        
+        while(top != -1 && temperatures[stack[top]] < temperatures[i]) {
+            int idx = stack[top--];
+            result[idx] = i - idx;
+        }
+        stack[++top] = i;
+    }
+    
+    free(stack);
+    return result;
+}
+
+41)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX 100
+
+typedef struct {
+    int heap[MAX];
+    int size;
+} MinHeap;
+
+void initHeap(MinHeap* h) {
+    h->size = 0;
+}
+
+int isEmpty(MinHeap* h) {
+    return h->size == 0;
+}
+
+int isFull(MinHeap* h) {
+    return h->size == MAX;
+}
+
+// Get parent index
+int parent(int i) {
+    return (i - 1) / 2;
+}
+
+// Get left child index
+int leftChild(int i) {
+    return 2 * i + 1;
+}
+
+// Get right child index
+int rightChild(int i) {
+    return 2 * i + 2;
+}
+
+// Heapify up (for insertion)
+void heapifyUp(MinHeap* h, int idx) {
+    while(idx > 0 && h->heap[parent(idx)] > h->heap[idx]) {
+        int temp = h->heap[parent(idx)];
+        h->heap[parent(idx)] = h->heap[idx];
+        h->heap[idx] = temp;
+        idx = parent(idx);
+    }
+}
+
+// Heapify down (for deletion)
+void heapifyDown(MinHeap* h, int idx) {
+    int smallest = idx;
+    int left = leftChild(idx);
+    int right = rightChild(idx);
+    
+    if(left < h->size && h->heap[left] < h->heap[smallest]) {
+        smallest = left;
+    }
+    if(right < h->size && h->heap[right] < h->heap[smallest]) {
+        smallest = right;
+    }
+    
+    if(smallest != idx) {
+        int temp = h->heap[idx];
+        h->heap[idx] = h->heap[smallest];
+        h->heap[smallest] = temp;
+        heapifyDown(h, smallest);
+    }
+}
+
+// Insert element
+void insert(MinHeap* h, int val) {
+    if(isFull(h)) {
+        printf("Heap is full!\n");
+        return;
+    }
+    
+    h->heap[h->size] = val;
+    h->size++;
+    heapifyUp(h, h->size - 1);
+    printf("Inserted %d\n", val);
+}
+
+// Extract minimum element
+int extractMin(MinHeap* h) {
+    if(isEmpty(h)) {
+        printf("Heap is empty!\n");
+        return INT_MIN;
+    }
+    
+    int min = h->heap[0];
+    h->heap[0] = h->heap[h->size - 1];
+    h->size--;
+    heapifyDown(h, 0);
+    
+    return min;
+}
+
+// Get minimum element without removing
+int getMin(MinHeap* h) {
+    if(isEmpty(h)) return INT_MIN;
+    return h->heap[0];
+}
+
+// Display heap
+void display(MinHeap* h) {
+    if(isEmpty(h)) {
+        printf("Heap is empty\n");
+        return;
+    }
+    
+    printf("Min Heap: ");
+    for(int i = 0; i < h->size; i++) {
+        printf("%d ", h->heap[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    MinHeap h;
+    initHeap(&h);
+    int choice, val;
+    
+    while(1) {
+        printf("\n--- Min Heap Menu ---\n");
+        printf("1. Insert\n");
+        printf("2. Extract Min\n");
+        printf("3. Get Min\n");
+        printf("4. Display\n");
+        printf("5. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+        
+        switch(choice) {
+            case 1:
+                printf("Enter value: ");
+                scanf("%d", &val);
+                insert(&h, val);
+                break;
+            case 2:
+                val = extractMin(&h);
+                if(val != INT_MIN) {
+                    printf("Extracted min: %d\n", val);
+                }
+                break;
+            case 3:
+                val = getMin(&h);
+                if(val != INT_MIN) {
+                    printf("Minimum element: %d\n", val);
+                }
+                break;
+            case 4:
+                display(&h);
+                break;
+            case 5:
+                printf("Exiting...\n");
+                return 0;
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+    
+    return 0;
+}
+
+b) #include <stdlib.h>
+
+// Min-heap implementation
+void heapify(int* heap, int size, int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    
+    if(left < size && heap[left] < heap[smallest]) smallest = left;
+    if(right < size && heap[right] < heap[smallest]) smallest = right;
+    
+    if(smallest != i) {
+        int temp = heap[i];
+        heap[i] = heap[smallest];
+        heap[smallest] = temp;
+        heapify(heap, size, smallest);
+    }
+}
+
+int findKthLargest(int* nums, int numsSize, int k) {
+    // Create min-heap of first k elements
+    int* heap = (int*)malloc(k * sizeof(int));
+    for(int i = 0; i < k; i++) {
+        heap[i] = nums[i];
+    }
+    
+    // Build min-heap
+    for(int i = k / 2 - 1; i >= 0; i--) {
+        heapify(heap, k, i);
+    }
+    
+    // Process remaining elements
+    for(int i = k; i < numsSize; i++) {
+        if(nums[i] > heap[0]) {
+            heap[0] = nums[i];
+            heapify(heap, k, 0);
+        }
+    }
+    
+    int result = heap[0];
+    free(heap);
+    return result;
+}
+
+42)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 1000
+
+typedef struct {
+    int value;
+    int frequency;
+} Element;
+
+int compareFrequency(const void* a, const void* b) {
+    return ((Element*)b)->frequency - ((Element*)a)->frequency;
+}
+
+void topKFrequent(int arr[], int n, int k) {
+    // Assuming values are within a range (0-999)
+    int freq[MAX] = {0};
+    Element elements[MAX];
+    int uniqueCount = 0;
+    
+    // Count frequencies
+    for(int i = 0; i < n; i++) {
+        freq[arr[i]]++;
+    }
+    
+    // Store unique elements with their frequencies
+    for(int i = 0; i < MAX; i++) {
+        if(freq[i] > 0) {
+            elements[uniqueCount].value = i;
+            elements[uniqueCount].frequency = freq[i];
+            uniqueCount++;
+        }
+    }
+    
+    // Sort by frequency descending
+    qsort(elements, uniqueCount, sizeof(Element), compareFrequency);
+    
+    // Print top k
+    printf("Top %d frequent elements: ", k);
+    for(int i = 0; i < k && i < uniqueCount; i++) {
+        printf("%d ", elements[i].value);
+    }
+    printf("\n");
+}
+
+int main() {
+    int arr[100], n, k;
+    
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d elements: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    printf("Enter k: ");
+    scanf("%d", &k);
+    
+    topKFrequent(arr, n, k);
+    
+    return 0;
+}
+
+b) /**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+typedef struct {
+    int num;
+    int freq;
+} Pair;
+
+int compare(const void* a, const void* b) {
+    return ((Pair*)b)->freq - ((Pair*)a)->freq;
+}
+
+int* topKFrequent(int* nums, int numsSize, int k, int* returnSize) {
+    // Find max element to size frequency array
+    int max = nums[0];
+    for(int i = 1; i < numsSize; i++) {
+        if(nums[i] > max) max = nums[i];
+    }
+    
+    int* freq = (int*)calloc(max + 1, sizeof(int));
+    for(int i = 0; i < numsSize; i++) {
+        freq[nums[i]]++;
+    }
+    
+    Pair* pairs = (Pair*)malloc((max + 1) * sizeof(Pair));
+    int pairCount = 0;
+    
+    for(int i = 0; i <= max; i++) {
+        if(freq[i] > 0) {
+            pairs[pairCount].num = i;
+            pairs[pairCount].freq = freq[i];
+            pairCount++;
+        }
+    }
+    
+    qsort(pairs, pairCount, sizeof(Pair), compare);
+    
+    int* result = (int*)malloc(k * sizeof(int));
+    *returnSize = k;
+    
+    for(int i = 0; i < k; i++) {
+        result[i] = pairs[i].num;
+    }
+    
+    free(freq);
+    free(pairs);
+    return result;
+}
+
+43) 
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+typedef struct {
+    int arr[MAX];
+    int front;
+    int rear;
+    int size;
+} Deque;
+
+void initDeque(Deque* dq) {
+    dq->front = -1;
+    dq->rear = -1;
+    dq->size = 0;
+}
+
+int isEmpty(Deque* dq) {
+    return dq->size == 0;
+}
+
+void pushBack(Deque* dq, int val) {
+    if(isEmpty(dq)) {
+        dq->front = 0;
+        dq->rear = 0;
+    } else {
+        dq->rear++;
+    }
+    dq->arr[dq->rear] = val;
+    dq->size++;
+}
+
+void popFront(Deque* dq) {
+    if(isEmpty(dq)) return;
+    
+    if(dq->front == dq->rear) {
+        dq->front = -1;
+        dq->rear = -1;
+    } else {
+        dq->front++;
+    }
+    dq->size--;
+}
+
+void popBack(Deque* dq) {
+    if(isEmpty(dq)) return;
+    
+    if(dq->front == dq->rear) {
+        dq->front = -1;
+        dq->rear = -1;
+    } else {
+        dq->rear--;
+    }
+    dq->size--;
+}
+
+int getFront(Deque* dq) {
+    if(isEmpty(dq)) return -1;
+    return dq->arr[dq->front];
+}
+
+int getBack(Deque* dq) {
+    if(isEmpty(dq)) return -1;
+    return dq->arr[dq->rear];
+}
+
+void slidingWindowMaximum(int arr[], int n, int k) {
+    Deque dq;
+    initDeque(&dq);
+    
+    printf("Sliding window maximums:\n");
+    
+    for(int i = 0; i < n; i++) {
+        // Remove elements outside current window
+        while(!isEmpty(&dq) && getFront(&dq) <= i - k) {
+            popFront(&dq);
+        }
+        
+        // Remove smaller elements from back
+        while(!isEmpty(&dq) && arr[getBack(&dq)] <= arr[i]) {
+            popBack(&dq);
+        }
+        
+        pushBack(&dq, i);
+        
+        // Print maximum for windows starting from index k-1
+        if(i >= k - 1) {
+            printf("Window %d-%d: %d\n", i - k + 1, i, arr[getFront(&dq)]);
+        }
+    }
+}
+
+int main() {
+    int arr[100], n, k;
+    
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d elements: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    printf("Enter window size k: ");
+    scanf("%d", &k);
+    
+    slidingWindowMaximum(arr, n, k);
+    
+    return 0;
+}
+
+b) /**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* maxSlidingWindow(int* nums, int numsSize, int k, int* returnSize) {
+    if(numsSize == 0 || k == 0) {
+        *returnSize = 0;
+        return NULL;
+    }
+    
+    int* result = (int*)malloc((numsSize - k + 1) * sizeof(int));
+    *returnSize = numsSize - k + 1;
+    
+    int* deque = (int*)malloc(numsSize * sizeof(int));
+    int front = 0, rear = -1;
+    int resultIdx = 0;
+    
+    for(int i = 0; i < numsSize; i++) {
+        // Remove elements outside window
+        while(front <= rear && deque[front] <= i - k) {
+            front++;
+        }
+        
+        // Remove smaller elements
+        while(front <= rear && nums[deque[rear]] <= nums[i]) {
+            rear--;
+        }
+        
+        deque[++rear] = i;
+        
+        // Add to result when window is complete
+        if(i >= k - 1) {
+            result[resultIdx++] = nums[deque[front]];
+        }
+    }
+    
+    free(deque);
+    return result;
+}
+
+44)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_TASKS 26
+
+int leastInterval(char* tasks, int n, int maxTaskTypes) {
+    int freq[MAX_TASKS] = {0};
+    int len = 0;
+    
+    // Count frequency of each task
+    for(int i = 0; tasks[i] != '\0'; i++) {
+        freq[tasks[i] - 'A']++;
+        len++;
+    }
+    
+    // Find max frequency
+    int maxFreq = 0;
+    for(int i = 0; i < MAX_TASKS; i++) {
+        if(freq[i] > maxFreq) {
+            maxFreq = freq[i];
+        }
+    }
+    
+    // Count how many tasks have max frequency
+    int maxCount = 0;
+    for(int i = 0; i < MAX_TASKS; i++) {
+        if(freq[i] == maxFreq) {
+            maxCount++;
+        }
+    }
+    
+    // Calculate result
+    int result = (maxFreq - 1) * (n + 1) + maxCount;
+    return (result > len) ? result : len;
+}
+
+int main() {
+    char tasks[100];
+    int n;
+    
+    printf("Enter tasks (as uppercase letters without spaces): ");
+    scanf("%s", tasks);
+    
+    printf("Enter cooling period n: ");
+    scanf("%d", &n);
+    
+    int result = leastInterval(tasks, n, 26);
+    printf("Least intervals needed: %d\n", result);
+    
+    return 0;
+}
+
+b) #include <stdlib.h>
+
+int leastInterval(char* tasks, int tasksSize, int n) {
+    int freq[26] = {0};
+    
+    for(int i = 0; i < tasksSize; i++) {
+        freq[tasks[i] - 'A']++;
+    }
+    
+    // Find max frequency
+    int maxFreq = 0;
+    for(int i = 0; i < 26; i++) {
+        if(freq[i] > maxFreq) {
+            maxFreq = freq[i];
+        }
+    }
+    
+    // Count tasks with max frequency
+    int maxCount = 0;
+    for(int i = 0; i < 26; i++) {
+        if(freq[i] == maxFreq) {
+            maxCount++;
+        }
+    }
+    
+    int result = (maxFreq - 1) * (n + 1) + maxCount;
+    return (result > tasksSize) ? result : tasksSize;
+}
+
+45)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+// Create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Insert into BST (for creating a sample tree)
+struct Node* insertBST(struct Node* root, int data) {
+    if(root == NULL) {
+        return createNode(data);
+    }
+    
+    if(data < root->data) {
+        root->left = insertBST(root->left, data);
+    } else if(data > root->data) {
+        root->right = insertBST(root->right, data);
+    }
+    
+    return root;
+}
+
+// Calculate height of binary tree (recursive)
+int height(struct Node* root) {
+    if(root == NULL) {
+        return 0;
+    }
+    
+    int leftHeight = height(root->left);
+    int rightHeight = height(root->right);
+    
+    return (leftHeight > rightHeight) ? leftHeight + 1 : rightHeight + 1;
+}
+
+// Calculate height using iterative approach (level order)
+int heightIterative(struct Node* root) {
+    if(root == NULL) return 0;
+    
+    struct Node* queue[100];
+    int front = 0, rear = 0;
+    int height = 0;
+    
+    queue[rear++] = root;
+    queue[rear++] = NULL;  // Level marker
+    
+    while(front < rear) {
+        struct Node* current = queue[front++];
+        
+        if(current == NULL) {
+            height++;
+            if(front < rear) {
+                queue[rear++] = NULL;
+            }
+        } else {
+            if(current->left != NULL) {
+                queue[rear++] = current->left;
+            }
+            if(current->right != NULL) {
+                queue[rear++] = current->right;
+            }
+        }
+    }
+    
+    return height;
+}
+
+// Inorder traversal
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insertBST(root, val);
+    }
+    
+    printf("\nInorder traversal: ");
+    inorder(root);
+    printf("\n");
+    
+    int treeHeight = height(root);
+    printf("Height of tree (recursive): %d\n", treeHeight);
+    
+    int treeHeightIter = heightIterative(root);
+    printf("Height of tree (iterative): %d\n", treeHeightIter);
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+// Recursive solution
+int maxDepth(struct TreeNode* root) {
+    if(root == NULL) {
+        return 0;
+    }
+    
+    int leftDepth = maxDepth(root->left);
+    int rightDepth = maxDepth(root->right);
+    
+    return (leftDepth > rightDepth ? leftDepth : rightDepth) + 1;
+}
+
+// Iterative solution using stack (DFS)
+int maxDepthIterative(struct TreeNode* root) {
+    if(root == NULL) return 0;
+    
+    struct TreeNode* stack[10000];
+    int depthStack[10000];
+    int top = -1;
+    
+    stack[++top] = root;
+    depthStack[top] = 1;
+    int maxDepth = 0;
+    
+    while(top >= 0) {
+        struct TreeNode* node = stack[top];
+        int depth = depthStack[top--];
+        
+        if(depth > maxDepth) maxDepth = depth;
+        
+        if(node->right != NULL) {
+            stack[++top] = node->right;
+            depthStack[top] = depth + 1;
+        }
+        if(node->left != NULL) {
+            stack[++top] = node->left;
+            depthStack[top] = depth + 1;
+        }
+    }
+    
+    return maxDepth;
+}
 
