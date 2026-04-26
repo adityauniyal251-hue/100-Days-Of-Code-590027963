@@ -5766,3 +5766,2288 @@ int maxDepthIterative(struct TreeNode* root) {
     return maxDepth;
 }
 
+46)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Insert into BST
+struct Node* insertBST(struct Node* root, int data) {
+    if(root == NULL) {
+        return createNode(data);
+    }
+    
+    if(data < root->data) {
+        root->left = insertBST(root->left, data);
+    } else if(data > root->data) {
+        root->right = insertBST(root->right, data);
+    }
+    
+    return root;
+}
+
+// Inorder Traversal (Left - Root - Right)
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+// Preorder Traversal (Root - Left - Right)
+void preorder(struct Node* root) {
+    if(root != NULL) {
+        printf("%d ", root->data);
+        preorder(root->left);
+        preorder(root->right);
+    }
+}
+
+// Postorder Traversal (Left - Right - Root)
+void postorder(struct Node* root) {
+    if(root != NULL) {
+        postorder(root->left);
+        postorder(root->right);
+        printf("%d ", root->data);
+    }
+}
+
+// Level Order Traversal (BFS)
+void levelOrder(struct Node* root) {
+    if(root == NULL) return;
+    
+    struct Node* queue[100];
+    int front = 0, rear = 0;
+    
+    queue[rear++] = root;
+    
+    while(front < rear) {
+        struct Node* current = queue[front++];
+        printf("%d ", current->data);
+        
+        if(current->left != NULL) {
+            queue[rear++] = current->left;
+        }
+        if(current->right != NULL) {
+            queue[rear++] = current->right;
+        }
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, choice;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insertBST(root, val);
+    }
+    
+    printf("\nChoose traversal:\n");
+    printf("1. Inorder\n");
+    printf("2. Preorder\n");
+    printf("3. Postorder\n");
+    printf("4. Level Order\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    printf("\nTraversal result: ");
+    switch(choice) {
+        case 1:
+            inorder(root);
+            break;
+        case 2:
+            preorder(root);
+            break;
+        case 3:
+            postorder(root);
+            break;
+        case 4:
+            levelOrder(root);
+            break;
+        default:
+            printf("Invalid choice");
+    }
+    printf("\n");
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+// Recursive solution
+void inorderHelper(struct TreeNode* root, int* result, int* size) {
+    if(root == NULL) return;
+    
+    inorderHelper(root->left, result, size);
+    result[(*size)++] = root->val;
+    inorderHelper(root->right, result, size);
+}
+
+int* inorderTraversal(struct TreeNode* root, int* returnSize) {
+    int* result = (int*)malloc(100 * sizeof(int));
+    *returnSize = 0;
+    inorderHelper(root, result, returnSize);
+    return result;
+}
+
+// Iterative solution using stack
+int* inorderTraversalIterative(struct TreeNode* root, int* returnSize) {
+    int* result = (int*)malloc(100 * sizeof(int));
+    *returnSize = 0;
+    
+    struct TreeNode* stack[100];
+    int top = -1;
+    struct TreeNode* current = root;
+    
+    while(current != NULL || top != -1) {
+        while(current != NULL) {
+            stack[++top] = current;
+            current = current->left;
+        }
+        
+        current = stack[top--];
+        result[(*returnSize)++] = current->val;
+        current = current->right;
+    }
+    
+    return result;
+}
+
+47)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insertBST(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insertBST(root->left, data);
+    else if(data > root->data) root->right = insertBST(root->right, data);
+    return root;
+}
+
+// Level order traversal with level markers
+void levelOrderWithLevels(struct Node* root) {
+    if(root == NULL) return;
+    
+    struct Node* queue[100];
+    int front = 0, rear = 0;
+    int level = 0;
+    
+    queue[rear++] = root;
+    queue[rear++] = NULL;  // Level marker
+    
+    printf("Level %d: ", level);
+    
+    while(front < rear) {
+        struct Node* current = queue[front++];
+        
+        if(current == NULL) {
+            if(front < rear) {
+                level++;
+                printf("\nLevel %d: ", level);
+                queue[rear++] = NULL;
+            }
+        } else {
+            printf("%d ", current->data);
+            
+            if(current->left != NULL) {
+                queue[rear++] = current->left;
+            }
+            if(current->right != NULL) {
+                queue[rear++] = current->right;
+            }
+        }
+    }
+    printf("\n");
+}
+
+// Zigzag level order traversal (spiral)
+void zigzagLevelOrder(struct Node* root) {
+    if(root == NULL) return;
+    
+    struct Node* stack1[100];
+    struct Node* stack2[100];
+    int top1 = -1, top2 = -1;
+    int leftToRight = 1;
+    
+    stack1[++top1] = root;
+    
+    printf("Zigzag Level Order:\n");
+    
+    while(top1 != -1) {
+        while(top1 != -1) {
+            struct Node* current = stack1[top1--];
+            printf("%d ", current->data);
+            
+            if(leftToRight) {
+                if(current->left) stack2[++top2] = current->left;
+                if(current->right) stack2[++top2] = current->right;
+            } else {
+                if(current->right) stack2[++top2] = current->right;
+                if(current->left) stack2[++top2] = current->left;
+            }
+        }
+        
+        printf("\n");
+        leftToRight = !leftToRight;
+        
+        // Swap stacks
+        struct Node** tempStack = stack1;
+        int tempTop = top1;
+        stack1 = stack2;
+        top1 = top2;
+        stack2 = tempStack;
+        top2 = tempTop;
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, choice;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insertBST(root, val);
+    }
+    
+    printf("\nChoose operation:\n");
+    printf("1. Level Order with Levels\n");
+    printf("2. Zigzag Level Order\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    if(choice == 1) {
+        levelOrderWithLevels(root);
+    } else {
+        zigzagLevelOrder(root);
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int** levelOrder(struct TreeNode* root, int* returnSize, int** returnColumnSizes) {
+    if(root == NULL) {
+        *returnSize = 0;
+        return NULL;
+    }
+    
+    int** result = (int**)malloc(2000 * sizeof(int*));
+    *returnColumnSizes = (int*)malloc(2000 * sizeof(int));
+    *returnSize = 0;
+    
+    struct TreeNode* queue[2000];
+    int front = 0, rear = 0;
+    
+    queue[rear++] = root;
+    
+    while(front < rear) {
+        int levelSize = rear - front;
+        (*returnColumnSizes)[*returnSize] = levelSize;
+        result[*returnSize] = (int*)malloc(levelSize * sizeof(int));
+        
+        for(int i = 0; i < levelSize; i++) {
+            struct TreeNode* node = queue[front++];
+            result[*returnSize][i] = node->val;
+            
+            if(node->left) queue[rear++] = node->left;
+            if(node->right) queue[rear++] = node->right;
+        }
+        (*returnSize)++;
+    }
+    
+    return result;
+}
+
+48)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insertBST(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insertBST(root->left, data);
+    else if(data > root->data) root->right = insertBST(root->right, data);
+    return root;
+}
+
+// Count leaf nodes recursively
+int countLeaves(struct Node* root) {
+    if(root == NULL) return 0;
+    
+    if(root->left == NULL && root->right == NULL) {
+        return 1;
+    }
+    
+    return countLeaves(root->left) + countLeaves(root->right);
+}
+
+// Count non-leaf nodes
+int countNonLeaves(struct Node* root) {
+    if(root == NULL) return 0;
+    
+    if(root->left == NULL && root->right == NULL) {
+        return 0;
+    }
+    
+    return 1 + countNonLeaves(root->left) + countNonLeaves(root->right);
+}
+
+// Count total nodes
+int countNodes(struct Node* root) {
+    if(root == NULL) return 0;
+    return 1 + countNodes(root->left) + countNodes(root->right);
+}
+
+// Print all leaf nodes
+void printLeaves(struct Node* root) {
+    if(root == NULL) return;
+    
+    if(root->left == NULL && root->right == NULL) {
+        printf("%d ", root->data);
+        return;
+    }
+    
+    printLeaves(root->left);
+    printLeaves(root->right);
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insertBST(root, val);
+    }
+    
+    printf("\nTotal nodes: %d\n", countNodes(root));
+    printf("Leaf nodes: %d\n", countLeaves(root));
+    printf("Non-leaf nodes: %d\n", countNonLeaves(root));
+    printf("Leaf values: ");
+    printLeaves(root);
+    printf("\n");
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int sumOfLeftLeaves(struct TreeNode* root) {
+    if(root == NULL) return 0;
+    
+    int sum = 0;
+    
+    // Check if left child exists and is a leaf
+    if(root->left != NULL && root->left->left == NULL && root->left->right == NULL) {
+        sum += root->left->val;
+    }
+    
+    // Recursively check left and right subtrees
+    sum += sumOfLeftLeaves(root->left);
+    sum += sumOfLeftLeaves(root->right);
+    
+    return sum;
+}
+
+49)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Recursive insert
+struct Node* insertRecursive(struct Node* root, int data) {
+    if(root == NULL) {
+        return createNode(data);
+    }
+    
+    if(data < root->data) {
+        root->left = insertRecursive(root->left, data);
+    } else if(data > root->data) {
+        root->right = insertRecursive(root->right, data);
+    }
+    // If equal, do nothing (no duplicates)
+    
+    return root;
+}
+
+// Iterative insert
+struct Node* insertIterative(struct Node* root, int data) {
+    struct Node* newNode = createNode(data);
+    
+    if(root == NULL) {
+        return newNode;
+    }
+    
+    struct Node* current = root;
+    struct Node* parent = NULL;
+    
+    while(current != NULL) {
+        parent = current;
+        if(data < current->data) {
+            current = current->left;
+        } else if(data > current->data) {
+            current = current->right;
+        } else {
+            // Duplicate not allowed
+            free(newNode);
+            return root;
+        }
+    }
+    
+    if(data < parent->data) {
+        parent->left = newNode;
+    } else {
+        parent->right = newNode;
+    }
+    
+    return root;
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, choice, newVal;
+    
+    printf("Enter number of initial nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insertRecursive(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    printf("\nChoose insert method:\n");
+    printf("1. Recursive Insert\n");
+    printf("2. Iterative Insert\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    printf("Enter value to insert: ");
+    scanf("%d", &newVal);
+    
+    if(choice == 1) {
+        root = insertRecursive(root, newVal);
+    } else {
+        root = insertIterative(root, newVal);
+    }
+    
+    printf("BST after insertion (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+struct TreeNode* insertIntoBST(struct TreeNode* root, int val) {
+    if(root == NULL) {
+        struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+        newNode->val = val;
+        newNode->left = NULL;
+        newNode->right = NULL;
+        return newNode;
+    }
+    
+    if(val < root->val) {
+        root->left = insertIntoBST(root->left, val);
+    } else if(val > root->val) {
+        root->right = insertIntoBST(root->right, val);
+    }
+    
+    return root;
+}
+
+50)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+// Recursive search
+struct Node* searchRecursive(struct Node* root, int key) {
+    if(root == NULL || root->data == key) {
+        return root;
+    }
+    
+    if(key < root->data) {
+        return searchRecursive(root->left, key);
+    }
+    return searchRecursive(root->right, key);
+}
+
+// Iterative search
+struct Node* searchIterative(struct Node* root, int key) {
+    struct Node* current = root;
+    
+    while(current != NULL) {
+        if(current->data == key) {
+            return current;
+        } else if(key < current->data) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+    
+    return NULL;
+}
+
+// Find minimum value node
+struct Node* findMin(struct Node* root) {
+    if(root == NULL) return NULL;
+    
+    struct Node* current = root;
+    while(current->left != NULL) {
+        current = current->left;
+    }
+    return current;
+}
+
+// Find maximum value node
+struct Node* findMax(struct Node* root) {
+    if(root == NULL) return NULL;
+    
+    struct Node* current = root;
+    while(current->right != NULL) {
+        current = current->right;
+    }
+    return current;
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, key, choice;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    printf("\nMinimum value: %d\n", findMin(root)->data);
+    printf("Maximum value: %d\n", findMax(root)->data);
+    
+    printf("\nChoose search method:\n");
+    printf("1. Recursive Search\n");
+    printf("2. Iterative Search\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    printf("Enter value to search: ");
+    scanf("%d", &key);
+    
+    struct Node* result;
+    if(choice == 1) {
+        result = searchRecursive(root, key);
+    } else {
+        result = searchIterative(root, key);
+    }
+    
+    if(result != NULL) {
+        printf("Found: %d\n", result->data);
+    } else {
+        printf("Not found\n");
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+struct TreeNode* searchBST(struct TreeNode* root, int val) {
+    if(root == NULL || root->val == val) {
+        return root;
+    }
+    
+    if(val < root->val) {
+        return searchBST(root->left, val);
+    }
+    return searchBST(root->right, val);
+}
+
+51)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+// Recursive LCA
+struct Node* lowestCommonAncestorRecursive(struct Node* root, struct Node* p, struct Node* q) {
+    if(root == NULL) return NULL;
+    
+    // If both values are smaller, LCA is in left subtree
+    if(p->data < root->data && q->data < root->data) {
+        return lowestCommonAncestorRecursive(root->left, p, q);
+    }
+    // If both values are larger, LCA is in right subtree
+    else if(p->data > root->data && q->data > root->data) {
+        return lowestCommonAncestorRecursive(root->right, p, q);
+    }
+    // Otherwise, current node is the LCA
+    else {
+        return root;
+    }
+}
+
+// Iterative LCA
+struct Node* lowestCommonAncestorIterative(struct Node* root, struct Node* p, struct Node* q) {
+    struct Node* current = root;
+    
+    while(current != NULL) {
+        if(p->data < current->data && q->data < current->data) {
+            current = current->left;
+        } else if(p->data > current->data && q->data > current->data) {
+            current = current->right;
+        } else {
+            return current;
+        }
+    }
+    
+    return NULL;
+}
+
+// Find node by value
+struct Node* findNode(struct Node* root, int val) {
+    if(root == NULL || root->data == val) return root;
+    
+    if(val < root->data) return findNode(root->left, val);
+    return findNode(root->right, val);
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, val1, val2, choice;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    printf("\nEnter two node values to find LCA: ");
+    scanf("%d %d", &val1, &val2);
+    
+    struct Node* p = findNode(root, val1);
+    struct Node* q = findNode(root, val2);
+    
+    if(p == NULL || q == NULL) {
+        printf("One or both nodes not found!\n");
+        return 1;
+    }
+    
+    printf("\nChoose method:\n");
+    printf("1. Recursive LCA\n");
+    printf("2. Iterative LCA\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    struct Node* lca;
+    if(choice == 1) {
+        lca = lowestCommonAncestorRecursive(root, p, q);
+    } else {
+        lca = lowestCommonAncestorIterative(root, p, q);
+    }
+    
+    if(lca != NULL) {
+        printf("Lowest Common Ancestor of %d and %d is: %d\n", val1, val2, lca->data);
+    } else {
+        printf("LCA not found\n");
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+struct TreeNode* lowestCommonAncestor(struct TreeNode* root, struct TreeNode* p, struct TreeNode* q) {
+    struct TreeNode* current = root;
+    
+    while(current != NULL) {
+        if(p->val < current->val && q->val < current->val) {
+            current = current->left;
+        } else if(p->val > current->val && q->val > current->val) {
+            current = current->right;
+        } else {
+            return current;
+        }
+    }
+    
+    return NULL;
+}
+
+// Recursive version
+struct TreeNode* lowestCommonAncestorRecursive(struct TreeNode* root, struct TreeNode* p, struct TreeNode* q) {
+    if(root == NULL) return NULL;
+    
+    if(p->val < root->val && q->val < root->val) {
+        return lowestCommonAncestorRecursive(root->left, p, q);
+    } else if(p->val > root->val && q->val > root->val) {
+        return lowestCommonAncestorRecursive(root->right, p, q);
+    } else {
+        return root;
+    }
+}
+
+52)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+// Print array
+void printPath(int path[], int pathLen) {
+    for(int i = 0; i < pathLen; i++) {
+        printf("%d", path[i]);
+        if(i < pathLen - 1) printf(" -> ");
+    }
+    printf("\n");
+}
+
+// Print all root-to-leaf paths recursively
+void printPathsRecursive(struct Node* root, int path[], int pathLen) {
+    if(root == NULL) return;
+    
+    path[pathLen] = root->data;
+    pathLen++;
+    
+    if(root->left == NULL && root->right == NULL) {
+        printPath(path, pathLen);
+    } else {
+        printPathsRecursive(root->left, path, pathLen);
+        printPathsRecursive(root->right, path, pathLen);
+    }
+}
+
+// Find paths with a given sum
+void findPathsWithSum(struct Node* root, int targetSum, int path[], int pathLen, int currentSum) {
+    if(root == NULL) return;
+    
+    currentSum += root->data;
+    path[pathLen] = root->data;
+    pathLen++;
+    
+    if(root->left == NULL && root->right == NULL && currentSum == targetSum) {
+        printPath(path, pathLen);
+    }
+    
+    findPathsWithSum(root->left, targetSum, path, pathLen, currentSum);
+    findPathsWithSum(root->right, targetSum, path, pathLen, currentSum);
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, sum;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    int path[100];
+    printf("\nRoot-to-leaf paths:\n");
+    printPathsRecursive(root, path, 0);
+    
+    printf("\nEnter target sum: ");
+    scanf("%d", &sum);
+    printf("Paths with sum %d:\n", sum);
+    findPathsWithSum(root, sum, path, 0, 0);
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+void dfs(struct TreeNode* root, char** result, int* returnSize, char* path, int pathLen) {
+    if(root == NULL) return;
+    
+    if(root->left == NULL && root->right == NULL) {
+        // Leaf node - add current value to path and save
+        char* newPath = (char*)malloc((pathLen + 12) * sizeof(char));
+        sprintf(newPath, "%s%d", path, root->val);
+        result[*returnSize] = newPath;
+        (*returnSize)++;
+        return;
+    }
+    
+    char* newPath = (char*)malloc((pathLen + 12) * sizeof(char));
+    sprintf(newPath, "%s%d->", path, root->val);
+    
+    dfs(root->left, result, returnSize, newPath, strlen(newPath));
+    dfs(root->right, result, returnSize, newPath, strlen(newPath));
+    
+    free(newPath);
+}
+
+char** binaryTreePaths(struct TreeNode* root, int* returnSize) {
+    char** result = (char**)malloc(100 * sizeof(char*));
+    *returnSize = 0;
+    
+    if(root == NULL) return result ;
+   
+   dfs(root, result, returSIZE,"",0);
+
+   return result ;
+
+}
+
+53)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <stdbool.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+// Method 1: Using inorder traversal (returns if inorder is sorted)
+void inorderArray(struct Node* root, int arr[], int* index) {
+    if(root != NULL) {
+        inorderArray(root->left, arr, index);
+        arr[(*index)++] = root->data;
+        inorderArray(root->right, arr, index);
+    }
+}
+
+bool isBSTInorder(struct Node* root) {
+    int arr[100];
+    int index = 0;
+    inorderArray(root, arr, &index);
+    
+    for(int i = 1; i < index; i++) {
+        if(arr[i] <= arr[i-1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Method 2: Using range checking (efficient)
+bool isBSTUtil(struct Node* root, int min, int max) {
+    if(root == NULL) return true;
+    
+    if(root->data <= min || root->data >= max) {
+        return false;
+    }
+    
+    return isBSTUtil(root->left, min, root->data) &&
+           isBSTUtil(root->right, root->data, max);
+}
+
+bool isBST(struct Node* root) {
+    return isBSTUtil(root, INT_MIN, INT_MAX);
+}
+
+// Method 3: Using previous node tracking (inorder with prev)
+bool isBSTInorderPrev(struct Node* root, struct Node** prev) {
+    if(root == NULL) return true;
+    
+    if(!isBSTInorderPrev(root->left, prev)) {
+        return false;
+    }
+    
+    if(*prev != NULL && root->data <= (*prev)->data) {
+        return false;
+    }
+    *prev = root;
+    
+    return isBSTInorderPrev(root->right, prev);
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    if(isBST(root)) {
+        printf("This is a valid BST\n");
+    } else {
+        printf("This is NOT a valid BST\n");
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+bool isValidBSTUtil(struct TreeNode* root, long long min, long long max) {
+    if(root == NULL) return true;
+    
+    if(root->val <= min || root->val >= max) {
+        return false;
+    }
+    
+    return isValidBSTUtil(root->left, min, root->val) &&
+           isValidBSTUtil(root->right, root->val, max);
+}
+
+bool isValidBST(struct TreeNode* root) {
+    return isValidBSTUtil(root, LONG_LONG_MIN, LONG_LONG_MAX);
+}
+
+54)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+int max(int a, int b, int c) {
+    int maxVal = (a > b) ? a : b;
+    return (maxVal > c) ? maxVal : c;
+}
+
+int maxPathSumUtil(struct Node* root, int* globalMax) {
+    if(root == NULL) return 0;
+    
+    int leftSum = maxPathSumUtil(root->left, globalMax);
+    int rightSum = maxPathSumUtil(root->right, globalMax);
+    
+    // Maximum sum starting from root going through left or right
+    int maxSingle = root->data;
+    if(leftSum > 0) maxSingle += leftSum;
+    if(rightSum > 0) maxSingle += rightSum;
+    
+    // Update global maximum (path that goes through root)
+    pathSum = root->data;
+    if(leftSum > 0) pathSum += leftSum;
+    if(rightSum > 0) pathSum += rightSum;
+    
+    if(pathSum > *globalMax) {
+        *globalMax = pathSum;
+    }
+    
+    // Return max path sum starting from this node
+    int result = root->data;
+    int maxChild = (leftSum > rightSum) ? leftSum : rightSum;
+    if(maxChild > 0) result += maxChild;
+    
+    return result;
+}
+
+int maxPathSum(struct Node* root) {
+    int globalMax = INT_MIN;
+    maxPathSumUtil(root, &globalMax);
+    return globalMax;
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    printf("Maximum path sum: %d\n", maxPathSum(root));
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int maxPathSumUtil(struct TreeNode* root, int* globalMax) {
+    if(root == NULL) return 0;
+    
+    int leftSum = maxPathSumUtil(root->left, globalMax);
+    int rightSum = maxPathSumUtil(root->right, globalMax);
+    
+    // Path through current node
+    int pathThrough = root->val;
+    if(leftSum > 0) pathThrough += leftSum;
+    if(rightSum > 0) pathThrough += rightSum;
+    
+    if(pathThrough > *globalMax) {
+        *globalMax = pathThrough;
+    }
+    
+    // Return max path starting from current node
+    int result = root->val;
+    int maxChild = max(leftSum, rightSum);
+    if(maxChild > 0) result += maxChild;
+    
+    return result;
+}
+
+int maxPathSum(struct TreeNode* root) {
+    int globalMax = -1000000000;
+    maxPathSumUtil(root, &globalMax);
+    return globalMax;
+}
+
+55)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int height(struct Node* root) {
+    if(root == NULL) return 0;
+    return 1 + max(height(root->left), height(root->right));
+}
+
+int diameter(struct Node* root) {
+    if(root == NULL) return 0;
+    
+    int leftHeight = height(root->left);
+    int rightHeight = height(root->right);
+    
+    int leftDiameter = diameter(root->left);
+    int rightDiameter = diameter(root->right);
+    
+    return max(leftHeight + rightHeight + 1, max(leftDiameter, rightDiameter));
+}
+
+// Optimized: return both height and diameter
+int diameterOptimized(struct Node* root, int* height) {
+    if(root == NULL) {
+        *height = 0;
+        return 0;
+    }
+    
+    int leftHeight = 0, rightHeight = 0;
+    int leftDiameter = diameterOptimized(root->left, &leftHeight);
+    int rightDiameter = diameterOptimized(root->right, &rightHeight);
+    
+    *height = 1 + max(leftHeight, rightHeight);
+    
+    return max(leftHeight + rightHeight + 1, max(leftDiameter, rightDiameter));
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, heightVal = 0;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    printf("Diameter (simple): %d\n", diameter(root));
+    printf("Diameter (optimized): %d\n", diameterOptimized(root, &heightVal));
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int diameterUtil(struct TreeNode* root, int* maxDiameter) {
+    if(root == NULL) return 0;
+    
+    int leftHeight = diameterUtil(root->left, maxDiameter);
+    int rightHeight = diameterUtil(root->right, maxDiameter);
+    
+    int currentDiameter = leftHeight + rightHeight;
+    if(currentDiameter > *maxDiameter) {
+        *maxDiameter = currentDiameter;
+    }
+    
+    return 1 + max(leftHeight, rightHeight);
+}
+
+int diameterOfBinaryTree(struct TreeNode* root) {
+    int maxDiameter = 0;
+    diameterUtil(root, &maxDiameter);
+    return maxDiameter;
+}
+
+56)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Build a symmetric tree manually (for demo)
+struct Node* buildSymmetricTree() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(2);
+    root->left->left = createNode(3);
+    root->left->right = createNode(4);
+    root->right->left = createNode(4);
+    root->right->right = createNode(3);
+    return root;
+}
+
+// Build an asymmetric tree
+struct Node* buildAsymmetricTree() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(2);
+    root->left->right = createNode(3);
+    root->right->right = createNode(3);
+    return root;
+}
+
+// Check if two trees are mirrors
+bool isMirror(struct Node* left, struct Node* right) {
+    if(left == NULL && right == NULL) return true;
+    if(left == NULL || right == NULL) return false;
+    
+    return (left->data == right->data) &&
+           isMirror(left->left, right->right) &&
+           isMirror(left->right, right->left);
+}
+
+bool isSymmetric(struct Node* root) {
+    if(root == NULL) return true;
+    return isMirror(root->left, root->right);
+}
+
+// Iterative approach using queue
+bool isSymmetricIterative(struct Node* root) {
+    if(root == NULL) return true;
+    
+    struct Node* queue[200];
+    int front = 0, rear = 0;
+    
+    queue[rear++] = root->left;
+    queue[rear++] = root->right;
+    
+    while(front < rear) {
+        struct Node* leftNode = queue[front++];
+        struct Node* rightNode = queue[front++];
+        
+        if(leftNode == NULL && rightNode == NULL) continue;
+        if(leftNode == NULL || rightNode == NULL) return false;
+        if(leftNode->data != rightNode->data) return false;
+        
+        queue[rear++] = leftNode->left;
+        queue[rear++] = rightNode->right;
+        queue[rear++] = leftNode->right;
+        queue[rear++] = rightNode->left;
+    }
+    
+    return true;
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    int choice;
+    
+    printf("Choose tree:\n");
+    printf("1. Symmetric Tree\n");
+    printf("2. Asymmetric Tree\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    struct Node* root;
+    if(choice == 1) {
+        root = buildSymmetricTree();
+        printf("Symmetric Tree (inorder): ");
+    } else {
+        root = buildAsymmetricTree();
+        printf("Asymmetric Tree (inorder): ");
+    }
+    inorder(root);
+    printf("\n");
+    
+    if(isSymmetric(root)) {
+        printf("The tree is symmetric (recursive)\n");
+    } else {
+        printf("The tree is NOT symmetric (recursive)\n");
+    }
+    
+    if(isSymmetricIterative(root)) {
+        printf("The tree is symmetric (iterative)\n");
+    } else {
+        printf("The tree is NOT symmetric (iterative)\n");
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+bool isMirror(struct TreeNode* left, struct TreeNode* right) {
+    if(left == NULL && right == NULL) return true;
+    if(left == NULL || right == NULL) return false;
+    
+    return (left->val == right->val) &&
+           isMirror(left->left, right->right) &&
+           isMirror(left->right, right->left);
+}
+
+bool isSymmetric(struct TreeNode* root) {
+    if(root == NULL) return true;
+    return isMirror(root->left, root->right);
+}
+
+57)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+// Mirror the binary tree (swap left and right children)
+void mirrorTree(struct Node* root) {
+    if(root == NULL) return;
+    
+    // Swap left and right children
+    struct Node* temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+    
+    // Recursively mirror subtrees
+    mirrorTree(root->left);
+    mirrorTree(root->right);
+}
+
+// Check if two trees are mirrors
+bool areMirrors(struct Node* a, struct Node* b) {
+    if(a == NULL && b == NULL) return true;
+    if(a == NULL || b == NULL) return false;
+    
+    return (a->data == b->data) &&
+           areMirrors(a->left, b->right) &&
+           areMirrors(a->right, b->left);
+}
+
+// Flatten tree to linked list (preorder order)
+void flattenTree(struct Node* root) {
+    if(root == NULL) return;
+    
+    flattenTree(root->left);
+    flattenTree(root->right);
+    
+    struct Node* temp = root->right;
+    root->right = root->left;
+    root->left = NULL;
+    
+    struct Node* current = root;
+    while(current->right != NULL) {
+        current = current->right;
+    }
+    current->right = temp;
+}
+
+// Print tree as linked list (right pointers only)
+void printFlattened(struct Node* root) {
+    struct Node* current = root;
+    while(current != NULL) {
+        printf("%d -> ", current->data);
+        current = current->right;
+    }
+    printf("NULL\n");
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+void preorder(struct Node* root) {
+    if(root != NULL) {
+        printf("%d ", root->data);
+        preorder(root->left);
+        preorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, choice;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nOriginal BST (inorder): ");
+    inorder(root);
+    printf("\n");
+    printf("Original BST (preorder): ");
+    preorder(root);
+    printf("\n");
+    
+    printf("\nChoose operation:\n");
+    printf("1. Mirror the Tree\n");
+    printf("2. Flatten to Linked List\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    if(choice == 1) {
+        mirrorTree(root);
+        printf("\nAfter mirroring (inorder): ");
+        inorder(root);
+        printf("\n");
+        printf("After mirroring (preorder): ");
+        preorder(root);
+        printf("\n");
+    } else {
+        flattenTree(root);
+        printf("\nFlattened tree as linked list: ");
+        printFlattened(root);
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+void flatten(struct TreeNode* root) {
+    if(root == NULL) return;
+    
+    flatten(root->left);
+    flatten(root->right);
+    
+    struct TreeNode* temp = root->right;
+    root->right = root->left;
+    root->left = NULL;
+    
+    struct TreeNode* current = root;
+    while(current->right != NULL) {
+        current = current->right;
+    }
+    current->right = temp;
+}
+
+
+58)
+
+a)
+ #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Search for an element in inorder array
+int search(int inorder[], int start, int end, int val) {
+    for(int i = start; i <= end; i++) {
+        if(inorder[i] == val) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Build tree from inorder and preorder traversals
+struct Node* buildTreePreIn(int preorder[], int inorder[], int preStart, int preEnd, int inStart, int inEnd) {
+    if(preStart > preEnd || inStart > inEnd) {
+        return NULL;
+    }
+    
+    int rootVal = preorder[preStart];
+    struct Node* root = createNode(rootVal);
+    
+    int inIndex = search(inorder, inStart, inEnd, rootVal);
+    int leftCount = inIndex - inStart;
+    
+    root->left = buildTreePreIn(preorder, inorder,
+                                 preStart + 1, preStart + leftCount,
+                                 inStart, inIndex - 1);
+    root->right = buildTreePreIn(preorder, inorder,
+                                  preStart + leftCount + 1, preEnd,
+                                  inIndex + 1, inEnd);
+    
+    return root;
+}
+
+void inorderPrint(struct Node* root) {
+    if(root != NULL) {
+        inorderPrint(root->left);
+        printf("%d ", root->data);
+        inorderPrint(root->right);
+    }
+}
+
+void preorderPrint(struct Node* root) {
+    if(root != NULL) {
+        printf("%d ", root->data);
+        preorderPrint(root->left);
+        preorderPrint(root->right);
+    }
+}
+
+void postorderPrint(struct Node* root) {
+    if(root != NULL) {
+        postorderPrint(root->left);
+        postorderPrint(root->right);
+        printf("%d ", root->data);
+    }
+}
+
+int main() {
+    int inorder[100], preorder[100], n;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter inorder traversal: ");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &inorder[i]);
+    }
+    
+    printf("Enter preorder traversal: ");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &preorder[i]);
+    }
+    
+    struct Node* root = buildTreePreIn(preorder, inorder, 0, n - 1, 0, n - 1);
+    
+    printf("\nConstructed Tree:\n");
+    printf("Inorder: ");
+    inorderPrint(root);
+    printf("\n");
+    printf("Preorder: ");
+    preorderPrint(root);
+    printf("\n");
+    printf("Postorder: ");
+    postorderPrint(root);
+    printf("\n");
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int search(int* inorder, int start, int end, int val) {
+    for(int i = start; i <= end; i++) {
+        if(inorder[i] == val) return i;
+    }
+    return -1;
+}
+
+struct TreeNode* buildTreeUtil(int* preorder, int* inorder, int preStart, int preEnd, int inStart, int inEnd) {
+    if(preStart > preEnd || inStart > inEnd) return NULL;
+    
+    struct TreeNode* root = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->val = preorder[preStart];
+    root->left = NULL;
+    root->right = NULL;
+    
+    int inIndex = search(inorder, inStart, inEnd, root->val);
+    int leftCount = inIndex - inStart;
+    
+    root->left = buildTreeUtil(preorder, inorder,
+                               preStart + 1, preStart + leftCount,
+                               inStart, inIndex - 1);
+    root->right = buildTreeUtil(preorder, inorder,
+                                preStart + leftCount + 1, preEnd,
+                                inIndex + 1, inEnd);
+    
+    return root;
+}
+
+struct TreeNode* buildTree(int* preorder, int preorderSize, int* inorder, int inorderSize) {
+    return buildTreeUtil(preorder, inorder, 0, preorderSize - 1, 0, inorderSize - 1);
+}
+
+59)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int search(int inorder[], int start, int end, int val) {
+    for(int i = start; i <= end; i++) {
+        if(inorder[i] == val) return i;
+    }
+    return -1;
+}
+
+// Build tree from inorder and postorder traversals
+struct Node* buildTreePostIn(int postorder[], int inorder[], int postStart, int postEnd, int inStart, int inEnd) {
+    if(postStart > postEnd || inStart > inEnd) {
+        return NULL;
+    }
+    
+    int rootVal = postorder[postEnd];  // Last element in postorder is root
+    struct Node* root = createNode(rootVal);
+    
+    int inIndex = search(inorder, inStart, inEnd, rootVal);
+    int leftCount = inIndex - inStart;
+    
+    // Left subtree: postStart to postStart + leftCount - 1
+    root->left = buildTreePostIn(postorder, inorder,
+                                  postStart, postStart + leftCount - 1,
+                                  inStart, inIndex - 1);
+    // Right subtree: postStart + leftCount to postEnd - 1
+    root->right = buildTreePostIn(postorder, inorder,
+                                   postStart + leftCount, postEnd - 1,
+                                   inIndex + 1, inEnd);
+    
+    return root;
+}
+
+void inorderPrint(struct Node* root) {
+    if(root != NULL) {
+        inorderPrint(root->left);
+        printf("%d ", root->data);
+        inorderPrint(root->right);
+    }
+}
+
+void preorderPrint(struct Node* root) {
+    if(root != NULL) {
+        printf("%d ", root->data);
+        preorderPrint(root->left);
+        preorderPrint(root->right);
+    }
+}
+
+void postorderPrint(struct Node* root) {
+    if(root != NULL) {
+        postorderPrint(root->left);
+        postorderPrint(root->right);
+        printf("%d ", root->data);
+    }
+}
+
+int main() {
+    int inorder[100], postorder[100], n;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter inorder traversal: ");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &inorder[i]);
+    }
+    
+    printf("Enter postorder traversal: ");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &postorder[i]);
+    }
+    
+    struct Node* root = buildTreePostIn(postorder, inorder, 0, n - 1, 0, n - 1);
+    
+    printf("\nConstructed Tree:\n");
+    printf("Inorder: ");
+    inorderPrint(root);
+    printf("\n");
+    printf("Preorder: ");
+    preorderPrint(root);
+    printf("\n");
+    printf("Postorder: ");
+    postorderPrint(root);
+    printf("\n");
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int search(int* inorder, int start, int end, int val) {
+    for(int i = start; i <= end; i++) {
+        if(inorder[i] == val) return i;
+    }
+    return -1;
+}
+
+struct TreeNode* buildTreeUtil(int* inorder, int* postorder, int inStart, int inEnd, int postStart, int postEnd) {
+    if(inStart > inEnd || postStart > postEnd) return NULL;
+    
+    struct TreeNode* root = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->val = postorder[postEnd];
+    root->left = NULL;
+    root->right = NULL;
+    
+    int inIndex = search(inorder, inStart, inEnd, root->val);
+    int leftCount = inIndex - inStart;
+    
+    root->left = buildTreeUtil(inorder, postorder,
+                               inStart, inIndex - 1,
+                               postStart, postStart + leftCount - 1);
+    root->right = buildTreeUtil(inorder, postorder,
+                                inIndex + 1, inEnd,
+                                postStart + leftCount, postEnd - 1);
+    
+    return root;
+}
+
+struct TreeNode* buildTree(int* inorder, int inorderSize, int* postorder, int postorderSize) {
+    return buildTreeUtil(inorder, postorder, 0, inorderSize - 1, 0, postorderSize - 1);
+}
+
+60)
+
+a) #include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insert(struct Node* root, int data) {
+    if(root == NULL) return createNode(data);
+    if(data < root->data) root->left = insert(root->left, data);
+    else if(data > root->data) root->right = insert(root->right, data);
+    return root;
+}
+
+// Reverse level order (bottom-up)
+void reverseLevelOrder(struct Node* root) {
+    if(root == NULL) return;
+    
+    struct Node* queue[100];
+    int result[100][100];
+    int levelSizes[100];
+    int front = 0, rear = 0;
+    int level = 0;
+    
+    queue[rear++] = root;
+    queue[rear++] = NULL;
+    
+    while(front < rear) {
+        struct Node* current = queue[front++];
+        
+        if(current == NULL) {
+            if(front < rear) {
+                level++;
+                queue[rear++] = NULL;
+            }
+        } else {
+            result[level][levelSizes[level]++] = current->data;
+            
+            if(current->left != NULL) queue[rear++] = current->left;
+            if(current->right != NULL) queue[rear++] = current->right;
+        }
+    }
+    
+    printf("Reverse Level Order (bottom-up):\n");
+    for(int i = level; i >= 0; i--) {
+        printf("Level %d: ", i);
+        for(int j = 0; j < levelSizes[i]; j++) {
+            printf("%d ", result[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Zigzag level order (spiral)
+void zigzagLevelOrder(struct Node* root) {
+    if(root == NULL) return;
+    
+    struct Node* stack1[100];
+    struct Node* stack2[100];
+    int top1 = -1, top2 = -1;
+    int leftToRight = 1;
+    
+    stack1[++top1] = root;
+    
+    printf("Zigzag Level Order:\n");
+    int level = 0;
+    
+    while(top1 != -1) {
+        printf("Level %d: ", level);
+        
+        while(top1 != -1) {
+            struct Node* current = stack1[top1--];
+            printf("%d ", current->data);
+            
+            if(leftToRight) {
+                if(current->left) stack2[++top2] = current->left;
+                if(current->right) stack2[++top2] = current->right;
+            } else {
+                if(current->right) stack2[++top2] = current->right;
+                if(current->left) stack2[++top2] = current->left;
+            }
+        }
+        
+        printf("\n");
+        leftToRight = !leftToRight;
+        level++;
+        
+        // Swap stacks
+        struct Node** tempStack = stack1;
+        int tempTop = top1;
+        stack1 = stack2;
+        top1 = top2;
+        stack2 = tempStack;
+        top2 = tempTop;
+    }
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    int n, val, choice;
+    
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter %d values: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    
+    printf("\nBST (inorder): ");
+    inorder(root);
+    printf("\n");
+    
+    printf("\nChoose operation:\n");
+    printf("1. Reverse Level Order (Bottom-up)\n");
+    printf("2. Zigzag Level Order (Spiral)\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+    
+    if(choice == 1) {
+        reverseLevelOrder(root);
+    } else {
+        zigzagLevelOrder(root);
+    }
+    
+    return 0;
+}
+
+b) /**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int** levelOrderBottom(struct TreeNode* root, int* returnSize, int** returnColumnSizes) {
+    if(root == NULL) {
+        *returnSize = 0;
+        return NULL;
+    }
+    
+    int** result = (int**)malloc(2000 * sizeof(int*));
+    *returnColumnSizes = (int*)malloc(2000 * sizeof(int));
+    *returnSize = 0;
+    
+    struct TreeNode* queue[2000];
+    int front = 0, rear = 0;
+    
+    queue[rear++] = root;
+    
+    while(front < rear) {
+        int levelSize = rear - front;
+        (*returnColumnSizes)[*returnSize] = levelSize;
+        result[*returnSize] = (int*)malloc(levelSize * sizeof(int));
+        
+        for(int i = 0; i < levelSize; i++) {
+            struct TreeNode* node = queue[front++];
+            result[*returnSize][i] = node->val;
+            
+            if(node->left) queue[rear++] = node->left;
+            if(node->right) queue[rear++] = node->right;
+        }
+        (*returnSize)++;
+    }
+    
+    // Reverse the result array for bottom-up order
+    for(int i = 0; i < *returnSize / 2; i++) {
+        int* tempArr = result[i];
+        result[i] = result[*returnSize - 1 - i];
+        result[*returnSize - 1 - i] = tempArr;
+        
+        int tempCol = (*returnColumnSizes)[i];
+        (*returnColumnSizes)[i] = (*returnColumnSizes)[*returnSize - 1 - i];
+        (*returnColumnSizes)[*returnSize - 1 - i] = tempCol;
+    }
+    
+    return result;
+}
+
+
+ 
+
