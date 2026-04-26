@@ -18,8 +18,7 @@ int main() {
     scanf("%d", &pos);
     printf("Enter element to insert: ");
     scanf("%d", &element);
-    
-    // Shift elements to right
+   
     for(int i = n; i > pos; i--) {
         arr[i] = arr[i-1];
     }
@@ -69,7 +68,6 @@ int main() {
     printf("\nEnter position to delete (0 to %d): ", n-1);
     scanf("%d", &pos);
     
-    // Shift elements to left
     for(int i = pos; i < n - 1; i++) {
         arr[i] = arr[i+1];
     }
