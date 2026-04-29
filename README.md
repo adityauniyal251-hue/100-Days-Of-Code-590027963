@@ -2622,6 +2622,1301 @@ int main() {
 
 Day 61
 
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+void flatten(struct Node* root) {
+    if(root == NULL)
+        return;
+
+    flatten(root->left);
+    flatten(root->right);
+
+    if(root->left != NULL) {
+        struct Node* temp = root->right;
+        root->right = root->left;
+        root->left = NULL;
+
+        struct Node* t = root->right;
+        while(t->right != NULL)
+            t = t->right;
+
+        t->right = temp;
+    }
+}
+
+void printList(struct Node* root) {
+    while(root != NULL) {
+        printf("%d ", root->data);
+        root = root->right;
+    }
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(5);
+    root->left->left = createNode(3);
+    root->left->right = createNode(4);
+    root->right->right = createNode(6);
+
+    flatten(root);
+
+    printf("Flattened Tree:\n");
+    printList(root);
+
+    return 0;
+}
+
+Day 62
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int search(int inorder[], int start, int end, int value) {
+    for(int i = start; i <= end; i++) {
+        if(inorder[i] == value)
+            return i;
+    }
+    return -1;
+}
+
+struct Node* buildTree(int preorder[], int inorder[], int start, int end, int *preIndex) {
+    if(start > end)
+        return NULL;
+
+    struct Node* root = createNode(preorder[*preIndex]);
+    (*preIndex)++;
+
+    if(start == end)
+        return root;
+
+    int inIndex = search(inorder, start, end, root->data);
+
+    root->left = buildTree(preorder, inorder, start, inIndex - 1, preIndex);
+    root->right = buildTree(preorder, inorder, inIndex + 1, end, preIndex);
+
+    return root;
+}
+
+void inorderPrint(struct Node* root) {
+    if(root != NULL) {
+        inorderPrint(root->left);
+        printf("%d ", root->data);
+        inorderPrint(root->right);
+    }
+}
+
+int main() {
+    int preorder[] = {3, 9, 20, 15, 7};
+    int inorder[] = {9, 3, 15, 20, 7};
+    int n = 5;
+
+    int preIndex = 0;
+
+    struct Node* root = buildTree(preorder, inorder, 0, n - 1, &preIndex);
+
+    printf("Inorder of constructed tree:\n");
+    inorderPrint(root);
+
+    return 0;
+}
+
+Day 63
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int search(int inorder[], int start, int end, int value) {
+    for(int i = start; i <= end; i++) {
+        if(inorder[i] == value)
+            return i;
+    }
+    return -1;
+}
+
+struct Node* buildTree(int inorder[], int postorder[], int start, int end, int *postIndex) {
+    if(start > end)
+        return NULL;
+
+    struct Node* root = createNode(postorder[*postIndex]);
+    (*postIndex)--;
+
+    if(start == end)
+        return root;
+
+    int inIndex = search(inorder, start, end, root->data);
+
+    root->right = buildTree(inorder, postorder, inIndex + 1, end, postIndex);
+    root->left  = buildTree(inorder, postorder, start, inIndex - 1, postIndex);
+
+    return root;
+}
+
+void preorderPrint(struct Node* root) {
+    if(root != NULL) {
+        printf("%d ", root->data);
+        preorderPrint(root->left);
+        preorderPrint(root->right);
+    }
+}
+
+int main() {
+    int inorder[] = {9, 3, 15, 20, 7};
+    int postorder[] = {9, 15, 7, 20, 3};
+    int n = 5;
+
+    int postIndex = n - 1;
+
+    struct Node* root = buildTree(inorder, postorder, 0, n - 1, &postIndex);
+
+    printf("Preorder of constructed tree:\n");
+    preorderPrint(root);
+
+    return 0;
+}
+
+Day 64
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MINCOVERED 0
+#define COVERED 1
+#define CAMERA 2
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int cameras = 0;
+
+int dfs(struct Node* root) {
+    if(root == NULL)
+        return COVERED;
+
+    int left = dfs(root->left);
+    int right = dfs(root->right);
+
+    if(left == MINCOVERED || right == MINCOVERED) {
+        cameras++;
+        return CAMERA;
+    }
+
+    if(left == CAMERA || right == CAMERA)
+        return COVERED;
+
+    return MINCOVERED;
+}
+
+int minCameraCover(struct Node* root) {
+    if(dfs(root) == MINCOVERED)
+        cameras++;
+
+    return cameras;
+}
+
+int main() {
+    struct Node* root = createNode(0);
+    root->left = createNode(0);
+    root->left->left = createNode(0);
+    root->left->right = createNode(0);
+
+    printf("Minimum Cameras Needed = %d\n", minCameraCover(root));
+
+    return 0;
+}
+
+Day 65
+
+#include <stdio.h>
+
+#define MAX 100
+
+int visited[MAX];
+int isConnected[MAX][MAX];
+int n;
+
+void dfs(int city) {
+    visited[city] = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(isConnected[city][i] == 1 && !visited[i]) {
+            dfs(i);
+        }
+    }
+}
+
+int main() {
+    n = 5;
+
+    int graph[5][5] = {
+        {1, 1, 0, 0, 0},
+        {1, 1, 0, 0, 0},
+        {0, 0, 1, 1, 0},
+        {0, 0, 1, 1, 0},
+        {0, 0, 0, 0, 1}
+    };
+
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            isConnected[i][j] = graph[i][j];
+        }
+    }
+
+    int provinces = 0;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            dfs(i);
+            provinces++;
+        }
+    }
+
+    printf("Number of Provinces = %d\n", provinces);
+
+    return 0;
+}
+
+Day 66
+
+#include <stdio.h>
+
+#define MAX 100
+
+int visited[MAX];
+int rooms[MAX][MAX];
+int roomSize[MAX];
+int n;
+
+void dfs(int room) {
+    visited[room] = 1;
+
+    for(int i = 0; i < roomSize[room]; i++) {
+        int key = rooms[room][i];
+        if(!visited[key]) {
+            dfs(key);
+        }
+    }
+}
+
+int main() {
+    n = 4;
+
+    // Example:
+    // room 0 has keys to 1,3
+    // room 1 has key to 3
+    // room 2 has no keys
+    // room 3 has key to 0
+
+    roomSize[0] = 2; rooms[0][0] = 1; rooms[0][1] = 3;
+    roomSize[1] = 1; rooms[1][0] = 3;
+    roomSize[2] = 0;
+    roomSize[3] = 1; rooms[3][0] = 0;
+
+    dfs(0);
+
+    int allVisited = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            allVisited = 0;
+            break;
+        }
+    }
+
+    if(allVisited)
+        printf("All rooms can be visited\n");
+    else
+        printf("Not all rooms can be visited\n");
+
+    return 0;
+}
+
+Day 67
+
+#include <stdio.h>
+
+int image[100][100];
+int visited[100][100];
+
+int n = 5, m = 5;
+
+void floodFill(int x, int y, int oldColor, int newColor) {
+    if(x < 0 || x >= n || y < 0 || y >= m)
+        return;
+
+    if(image[x][y] != oldColor || visited[x][y])
+        return;
+
+    visited[x][y] = 1;
+    image[x][y] = newColor;
+
+    floodFill(x + 1, y, oldColor, newColor);
+    floodFill(x - 1, y, oldColor, newColor);
+    floodFill(x, y + 1, oldColor, newColor);
+    floodFill(x, y - 1, oldColor, newColor);
+}
+
+int main() {
+    int i, j;
+
+    int grid[5][5] = {
+        {1, 1, 1, 2, 2},
+        {1, 1, 0, 2, 2},
+        {1, 0, 0, 2, 2},
+        {1, 1, 1, 2, 2},
+        {0, 0, 1, 1, 1}
+    };
+
+    for(i = 0; i < n; i++)
+        for(j = 0; j < m; j++)
+            image[i][j] = grid[i][j];
+
+    floodFill(0, 0, 1, 9);
+
+    printf("Flood Filled Image:\n");
+
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < m; j++) {
+            printf("%d ", image[i][j]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+
+Day 68
+
+#include <stdio.h>
+
+#define MAX 100
+
+int grid[MAX][MAX];
+int visited[MAX][MAX];
+
+int n = 3, m = 3;
+
+int dx[] = {1, -1, 0, 0};
+int dy[] = {0, 0, 1, -1};
+
+typedef struct {
+    int x, y;
+} Pair;
+
+Pair queue[MAX * MAX];
+int front = 0, rear = 0;
+
+int isValid(int x, int y) {
+    return x >= 0 && x < n && y >= 0 && y < m;
+}
+
+int main() {
+    int i, j;
+    int fresh = 0, time = 0;
+
+    int g[3][3] = {
+        {2, 1, 1},
+        {1, 1, 0},
+        {0, 1, 1}
+    };
+
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < m; j++) {
+            grid[i][j] = g[i][j];
+            if(grid[i][j] == 2) {
+                queue[rear++] = (Pair){i, j};
+                visited[i][j] = 1;
+            }
+            else if(grid[i][j] == 1) {
+                fresh++;
+            }
+        }
+    }
+
+    while(front < rear && fresh > 0) {
+        int size = rear - front;
+        int rotten = 0;
+
+        for(i = 0; i < size; i++) {
+            Pair p = queue[front++];
+
+            for(j = 0; j < 4; j++) {
+                int nx = p.x + dx[j];
+                int ny = p.y + dy[j];
+
+                if(isValid(nx, ny) && !visited[nx][ny] && grid[nx][ny] == 1) {
+                    grid[nx][ny] = 2;
+                    visited[nx][ny] = 1;
+                    queue[rear++] = (Pair){nx, ny};
+                    fresh--;
+                    rotten = 1;
+                }
+            }
+        }
+
+        if(rotten)
+            time++;
+    }
+
+    if(fresh == 0)
+        printf("Time required = %d\n", time);
+    else
+        printf("Not all oranges rot\n");
+
+    return 0;
+} 
+
+Day 69
+
+#include <stdio.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int visited[MAX];
+int n;
+
+int dfs(int node, int parent) {
+    visited[node] = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[node][i]) {
+            if(!visited[i]) {
+                if(dfs(i, node))
+                    return 1;
+            }
+            else if(i != parent) {
+                return 1; // cycle detected
+            }
+        }
+    }
+
+    return 0;
+}
+
+int main() {
+    n = 5;
+
+    int g[5][5] = {
+        {0, 1, 0, 0, 0},
+        {1, 0, 1, 0, 0},
+        {0, 1, 0, 1, 0},
+        {0, 0, 1, 0, 1},
+        {0, 0, 0, 1, 0}
+    };
+
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            graph[i][j] = g[i][j];
+
+    int hasCycle = 0;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            if(dfs(i, -1)) {
+                hasCycle = 1;
+                break;
+            }
+        }
+    }
+
+    if(hasCycle)
+        printf("Cycle Detected\n");
+    else
+        printf("No Cycle\n");
+
+    return 0;
+}
+
+Day 70
+
+#include <stdio.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int visited[MAX];
+int recStack[MAX];
+int n;
+
+int dfs(int node) {
+    visited[node] = 1;
+    recStack[node] = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[node][i]) {
+
+            if(!visited[i]) {
+                if(dfs(i))
+                    return 1;
+            }
+            else if(recStack[i]) {
+                return 1; // cycle found
+            }
+        }
+    }
+
+    recStack[node] = 0;
+    return 0;
+}
+
+int main() {
+    n = 4;
+
+    // course dependencies (u -> v means u depends on v)
+    int edges[4][2] = {
+        {0, 1},
+        {1, 2},
+        {2, 3},
+        {3, 1}   // cycle
+    };
+
+    for(int i = 0; i < 4; i++) {
+        graph[edges[i][0]][edges[i][1]] = 1;
+    }
+
+    int hasCycle = 0;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            if(dfs(i)) {
+                hasCycle = 1;
+                break;
+            }
+        }
+    }
+
+    if(hasCycle)
+        printf("Cannot finish courses\n");
+    else
+        printf("All courses can be finished\n");
+
+    return 0;
+}
+
+Day 71
+
+#include <stdio.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int visited[MAX];
+int recStack[MAX];
+int order[MAX];
+int idx = 0;
+
+int n;
+
+int dfs(int node) {
+    visited[node] = 1;
+    recStack[node] = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[node][i]) {
+
+            if(!visited[i]) {
+                if(dfs(i))
+                    return 1;
+            }
+            else if(recStack[i]) {
+                return 1; // cycle detected
+            }
+        }
+    }
+
+    recStack[node] = 0;
+    order[idx++] = node; // add after processing
+    return 0;
+}
+
+int main() {
+    n = 4;
+
+    int edges[4][2] = {
+        {1, 0},
+        {2, 0},
+        {3, 1},
+        {3, 2}
+    };
+
+    for(int i = 0; i < 4; i++) {
+        graph[edges[i][0]][edges[i][1]] = 1;
+    }
+
+    int hasCycle = 0;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            if(dfs(i)) {
+                hasCycle = 1;
+                break;
+            }
+        }
+    }
+
+    if(hasCycle) {
+        printf("No valid order (cycle exists)\n");
+    } else {
+        printf("Course Order:\n");
+
+        for(int i = idx - 1; i >= 0; i--) {
+            printf("%d ", order[i]);
+        }
+    }
+
+    return 0;
+}
+
+Day 72
+
+#include <stdio.h>
+
+#define MAX 26
+
+int graph[MAX][MAX];
+int visited[MAX];
+int stack[MAX];
+int top = -1;
+
+int n = 0;
+
+void addEdge(char u, char v) {
+    graph[u - 'a'][v - 'a'] = 1;
+}
+
+void dfs(int node) {
+    visited[node] = 1;
+
+    for(int i = 0; i < MAX; i++) {
+        if(graph[node][i] && !visited[i]) {
+            dfs(i);
+        }
+    }
+
+    stack[++top] = node;
+}
+
+int main() {
+    char words[][10] = {"wrt", "wrf", "er", "ett", "rftt"};
+    int wordsCount = 5;
+
+    for(int i = 0; i < wordsCount - 1; i++) {
+        char *w1 = words[i];
+        char *w2 = words[i + 1];
+
+        int j = 0;
+
+        while(w1[j] && w2[j] && w1[j] == w2[j])
+            j++;
+
+        if(w1[j] && w2[j]) {
+            addEdge(w1[j], w2[j]);
+        }
+    }
+
+    for(int i = 0; i < MAX; i++) {
+        if(!visited[i]) {
+            dfs(i);
+        }
+    }
+
+    printf("Alien Dictionary Order:\n");
+
+    for(int i = top; i >= 0; i--) {
+        printf("%c ", stack[i] + 'a');
+    }
+
+    return 0;
+}
+
+Day 73
+
+#include <stdio.h>
+
+#define MAX 100
+#define INF 1000000
+
+int graph[MAX][MAX];
+int dist[MAX];
+int visited[MAX];
+int n;
+
+int minDistance() {
+    int min = INF, minIndex = -1;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i] && dist[i] < min) {
+            min = dist[i];
+            minIndex = i;
+        }
+    }
+
+    return minIndex;
+}
+
+int main() {
+    n = 4;
+
+    // adjacency matrix (directed weighted graph)
+    int edges[4][3] = {
+        {0, 1, 1},
+        {1, 2, 2},
+        {0, 2, 4},
+        {2, 3, 1}
+    };
+
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            graph[i][j] = (i == j) ? 0 : INF;
+
+    for(int i = 0; i < 4; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int w = edges[i][2];
+        graph[u][v] = w;
+    }
+
+    for(int i = 0; i < n; i++) {
+        dist[i] = INF;
+        visited[i] = 0;
+    }
+
+    int source = 0;
+    dist[source] = 0;
+
+    for(int count = 0; count < n - 1; count++) {
+        int u = minDistance();
+        visited[u] = 1;
+
+        for(int v = 0; v < n; v++) {
+            if(!visited[v] && graph[u][v] != INF &&
+               dist[u] != INF &&
+               dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+            }
+        }
+    }
+
+    int maxTime = 0;
+
+    for(int i = 0; i < n; i++) {
+        if(dist[i] == INF) {
+            printf("Not all nodes reachable\n");
+            return 0;
+        }
+        if(dist[i] > maxTime)
+            maxTime = dist[i];
+    }
+
+    printf("Network Delay Time = %d\n", maxTime);
+
+    return 0;
+}
+
+Day 74
+
+#include <stdio.h>
+
+#define MAX 100
+#define INF 100000000
+
+int n = 4;
+int graph[MAX][MAX];
+
+int minCost = INF;
+
+void dfs(int src, int dst, int stops, int cost) {
+    if(cost >= minCost)
+        return;
+
+    if(src == dst) {
+        minCost = cost;
+        return;
+    }
+
+    if(stops < 0)
+        return;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[src][i] != INF) {
+            dfs(i, dst, stops - 1, cost + graph[src][i]);
+        }
+    }
+}
+
+int main() {
+    int edges[5][3] = {
+        {0, 1, 100},
+        {1, 2, 100},
+        {0, 2, 500},
+        {2, 3, 100},
+        {1, 3, 600}
+    };
+
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            graph[i][j] = INF;
+
+    for(int i = 0; i < 5; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int w = edges[i][2];
+        graph[u][v] = w;
+    }
+
+    int src = 0, dst = 3, K = 1;
+
+    dfs(src, dst, K, 0);
+
+    if(minCost == INF)
+        printf("No route within %d stops\n", K);
+    else
+        printf("Cheapest Price = %d\n", minCost);
+
+    return 0;
+}
+
+Day 75
+
+#include <stdio.h>
+
+#define MAX 100
+#define INF 100000000
+
+int n = 4;
+int graph[MAX][MAX];
+
+int minCost = INF;
+
+void dfs(int src, int dst, int stops, int cost) {
+    if(cost >= minCost)
+        return;
+
+    if(src == dst) {
+        minCost = cost;
+        return;
+    }
+
+    if(stops < 0)
+        return;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[src][i] != INF) {
+            dfs(i, dst, stops - 1, cost + graph[src][i]);
+        }
+    }
+}
+
+int main() {
+    int edges[5][3] = {
+        {0, 1, 100},
+        {1, 2, 100},
+        {0, 2, 500},
+        {2, 3, 100},
+        {1, 3, 600}
+    };
+
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            graph[i][j] = INF;
+
+    for(int i = 0; i < 5; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int w = edges[i][2];
+        graph[u][v] = w;
+    }
+
+    int src = 0, dst = 3, K = 1;
+
+    dfs(src, dst, K, 0);
+
+    if(minCost == INF)
+        printf("No route within %d stops\n", K);
+    else
+        printf("Cheapest Price = %d\n", minCost);
+
+    return 0;
+}
+
+Day 76
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+#define INF 100000000
+
+int n = 4;
+
+int parent[MAX];
+
+int find(int i) {
+    if(parent[i] == i)
+        return i;
+    return parent[i] = find(parent[i]);
+}
+
+void unionSet(int a, int b) {
+    parent[find(a)] = find(b);
+}
+
+int absVal(int x) {
+    return x < 0 ? -x : x;
+}
+
+int main() {
+    int points[4][2] = {
+        {0, 0},
+        {2, 2},
+        {3, 10},
+        {5, 2}
+    };
+
+    int edges[MAX][3];
+    int e = 0;
+
+    // Build all edges (Manhattan distance)
+    for(int i = 0; i < n; i++) {
+        for(int j = i + 1; j < n; j++) {
+            int dist = absVal(points[i][0] - points[j][0]) +
+                       absVal(points[i][1] - points[j][1]);
+
+            edges[e][0] = i;
+            edges[e][1] = j;
+            edges[e][2] = dist;
+            e++;
+        }
+    }
+
+    // Sort edges (simple bubble sort)
+    for(int i = 0; i < e - 1; i++) {
+        for(int j = 0; j < e - i - 1; j++) {
+            if(edges[j][2] > edges[j + 1][2]) {
+                int t0 = edges[j][0];
+                int t1 = edges[j][1];
+                int t2 = edges[j][2];
+
+                edges[j][0] = edges[j + 1][0];
+                edges[j][1] = edges[j + 1][1];
+                edges[j][2] = edges[j + 1][2];
+
+                edges[j + 1][0] = t0;
+                edges[j + 1][1] = t1;
+                edges[j + 1][2] = t2;
+            }
+        }
+    }
+
+    for(int i = 0; i < n; i++)
+        parent[i] = i;
+
+    int cost = 0, count = 0;
+
+    for(int i = 0; i < e && count < n - 1; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int w = edges[i][2];
+
+        if(find(u) != find(v)) {
+            unionSet(u, v);
+            cost += w;
+            count++;
+        }
+    }
+
+    printf("Minimum Cost to Connect All Points = %d\n", cost);
+
+    return 0;
+}
+
+Day 77
+
+#include <stdio.h>
+
+#define MAX 10
+#define INF 100000000
+
+int n = 4;
+int graph[MAX][MAX];
+
+int visited[MAX];
+
+int minCost = INF;
+
+void tsp(int curr, int count, int cost, int start) {
+    if(count == n && graph[curr][start] != 0) {
+        int totalCost = cost + graph[curr][start];
+        if(totalCost < minCost)
+            minCost = totalCost;
+        return;
+    }
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i] && graph[curr][i] != 0) {
+            visited[i] = 1;
+            tsp(i, count + 1, cost + graph[curr][i], start);
+            visited[i] = 0;
+        }
+    }
+}
+
+int main() {
+    int i, j;
+
+    int g[4][4] = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+
+    for(i = 0; i < n; i++)
+        for(j = 0; j < n; j++)
+            graph[i][j] = g[i][j];
+
+    visited[0] = 1;
+    tsp(0, 1, 0, 0);
+
+    printf("Minimum Cost of TSP = %d\n", minCost);
+
+    return 0;
+}
+
+Day 78
+
+#include <stdio.h>
+
+#define MAX 100
+
+int parent[MAX];
+int n = 5;
+
+int find(int x) {
+    if(parent[x] == x)
+        return x;
+    return parent[x] = find(parent[x]);
+}
+
+int unionSet(int a, int b) {
+    int pa = find(a);
+    int pb = find(b);
+
+    if(pa == pb)
+        return 1; // redundant edge
+
+    parent[pa] = pb;
+    return 0;
+}
+
+int main() {
+    int edges[5][2] = {
+        {1, 2},
+        {1, 3},
+        {2, 3}, // redundant
+        {3, 4},
+        {4, 5}
+    };
+
+    for(int i = 1; i <= n; i++)
+        parent[i] = i;
+
+    for(int i = 0; i < 5; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+
+        if(unionSet(u, v)) {
+            printf("Redundant Connection = [%d, %d]\n", u, v);
+            break;
+        }
+    }
+
+    return 0;
+}
+
+Day 79
+
+#include <stdio.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int visited[MAX];
+int n;
+
+void dfs(int node) {
+    visited[node] = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[node][i] && !visited[i]) {
+            dfs(i);
+        }
+    }
+}
+
+int main() {
+    n = 5;
+
+    int edges[4][2] = {
+        {0, 1},
+        {1, 2},
+        {3, 4}
+    };
+
+    // build adjacency matrix
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            graph[i][j] = 0;
+
+    for(int i = 0; i < 4; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        graph[u][v] = 1;
+        graph[v][u] = 1;
+    }
+
+    int components = 0;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            dfs(i);
+            components++;
+        }
+    }
+
+    printf("Number of Connected Components = %d\n", components);
+
+    return 0;
+}
+
+Day 80
+
+#include <stdio.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int color[MAX];
+int n;
+
+int dfs(int node, int c) {
+    color[node] = c;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[node][i]) {
+
+            if(color[i] == -1) {
+                if(!dfs(i, 1 - c))
+                    return 0;
+            }
+            else if(color[i] == c) {
+                return 0; // same color on both sides
+            }
+        }
+    }
+
+    return 1;
+}
+
+int main() {
+    n = 4;
+
+    int edges[4][2] = {
+        {0, 1},
+        {1, 2},
+        {2, 3},
+        {3, 0} // even cycle -> bipartite
+    };
+
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            graph[i][j] = 0;
+
+    for(int i = 0; i < 4; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        graph[u][v] = 1;
+        graph[v][u] = 1;
+    }
+
+    for(int i = 0; i < n; i++)
+        color[i] = -1;
+
+    int isBipartite = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(color[i] == -1) {
+            if(!dfs(i, 0)) {
+                isBipartite = 0;
+                break;
+            }
+        }
+    }
+
+    if(isBipartite)
+        printf("Graph is Bipartite\n");
+    else
+        printf("Graph is NOT Bipartite\n");
+
+    return 0;
+}
+
+Day 81
+
+
+
+
 
 
 
