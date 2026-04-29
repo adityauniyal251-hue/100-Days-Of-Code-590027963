@@ -1846,6 +1846,367 @@ int main() {
 
 Day 47
 
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int maxDepth(struct Node* root) {
+    if(root == NULL)
+        return 0;
+
+    int leftDepth = maxDepth(root->left);
+    int rightDepth = maxDepth(root->right);
+
+    if(leftDepth > rightDepth)
+        return leftDepth + 1;
+    else
+        return rightDepth + 1;
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(3);
+    root->left->left = createNode(4);
+    root->left->right = createNode(5);
+
+    printf("Maximum Depth = %d", maxDepth(root));
+
+    return 0;
+}
+
+Day 48
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+void levelOrder(struct Node* root) {
+    if(root == NULL) return;
+
+    struct Node* queue[MAX];
+    int front = 0, rear = 0;
+
+    queue[rear++] = root;
+
+    while(front < rear) {
+        struct Node* curr = queue[front++];
+
+        printf("%d ", curr->data);
+
+        if(curr->left != NULL)
+            queue[rear++] = curr->left;
+
+        if(curr->right != NULL)
+            queue[rear++] = curr->right;
+    }
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(3);
+    root->left->left = createNode(4);
+    root->left->right = createNode(5);
+
+    printf("Level Order Traversal:\n");
+    levelOrder(root);
+
+    return 0;
+}
+
+Day 48
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int maxDepth(struct Node* root) {
+    if(root == NULL)
+        return 0;
+
+    int leftDepth = maxDepth(root->left);
+    int rightDepth = maxDepth(root->right);
+
+    return (leftDepth > rightDepth ? leftDepth : rightDepth) + 1;
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(3);
+    root->left->left = createNode(4);
+    root->left->right = createNode(5);
+    root->left->left->left = createNode(6);
+
+    printf("Maximum Depth = %d\n", maxDepth(root));
+
+    return 0;
+}
+
+Day 49
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int sumOfLeftLeaves(struct Node* root) {
+    if(root == NULL)
+        return 0;
+
+    int sum = 0;
+
+    if(root->left != NULL) {
+        if(root->left->left == NULL && root->left->right == NULL)
+            sum += root->left->data;
+        else
+            sum += sumOfLeftLeaves(root->left);
+    }
+
+    sum += sumOfLeftLeaves(root->right);
+
+    return sum;
+}
+
+int main() {
+    struct Node* root = createNode(3);
+    root->left = createNode(9);
+    root->right = createNode(20);
+    root->right->left = createNode(15);
+    root->right->right = createNode(7);
+
+    printf("Sum of Left Leaves = %d\n", sumOfLeftLeaves(root));
+
+    return 0;
+}
+
+Day 50
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insertBST(struct Node* root, int val) {
+    if(root == NULL)
+        return createNode(val);
+
+    if(val < root->data)
+        root->left = insertBST(root->left, val);
+    else
+        root->right = insertBST(root->right, val);
+
+    return root;
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+
+    root = insertBST(root, 5);
+    insertBST(root, 3);
+    insertBST(root, 7);
+    insertBST(root, 2);
+    insertBST(root, 4);
+    insertBST(root, 6);
+    insertBST(root, 8);
+
+    printf("BST Inorder Traversal:\n");
+    inorder(root);
+
+    return 0;
+}
+
+Day 52
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insertBST(struct Node* root, int val) {
+    if(root == NULL)
+        return createNode(val);
+
+    if(val < root->data)
+        root->left = insertBST(root->left, val);
+    else
+        root->right = insertBST(root->right, val);
+
+    return root;
+}
+
+void inorder(struct Node* root) {
+    if(root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+
+    int arr[] = {8, 3, 10, 1, 6, 14, 4, 7, 13};
+    int n = 9;
+    int i;
+
+    for(i = 0; i < n; i++) {
+        root = insertBST(root, arr[i]);
+    }
+
+    printf("BST Inorder Traversal:\n");
+    inorder(root);
+
+    return 0;
+}
+
+Day 53
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insertBST(struct Node* root, int val) {
+    if(root == NULL)
+        return createNode(val);
+
+    if(val < root->data)
+        root->left = insertBST(root->left, val);
+    else
+        root->right = insertBST(root->right, val);
+
+    return root;
+}
+
+int searchBST(struct Node* root, int key) {
+    if(root == NULL)
+        return 0;
+
+    if(root->data == key)
+        return 1;
+
+    if(key < root->data)
+        return searchBST(root->left, key);
+    else
+        return searchBST(root->right, key);
+}
+
+int main() {
+    struct Node* root = NULL;
+
+    int arr[] = {8, 3, 10, 1, 6, 14, 4, 7, 13};
+    int n = 9, i;
+
+    for(i = 0; i < n; i++) {
+        root = insertBST(root, arr[i]);
+    }
+
+    int key = 7;
+
+    if(searchBST(root, key))
+        printf("%d found in BST\n", key);
+    else
+        printf("%d not found in BST\n", key);
+
+    return 0;
+}
+
+Day 54
+
+
+
 
 
 
