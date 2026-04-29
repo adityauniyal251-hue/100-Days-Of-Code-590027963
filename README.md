@@ -273,3 +273,260 @@ int main() {
 
 Day 12 
 
+#include <stdio.h>
+
+int main() {
+    int matrix[3][4] = {
+        {1, 2, 3, 4},
+        {5, 1, 2, 3},
+        {6, 5, 1, 2}
+    };
+
+    int rows = 3, cols = 4;
+    int i, j, flag = 1;
+
+    for(i = 1; i < rows; i++) {
+        for(j = 1; j < cols; j++) {
+            if(matrix[i][j] != matrix[i - 1][j - 1]) {
+                flag = 0;
+                break;
+            }
+        }
+    }
+
+    if(flag)
+        printf("Matrix is Toeplitz Matrix");
+    else
+        printf("Matrix is NOT Toeplitz Matrix");
+
+    return 0;
+}
+
+Day 13
+
+#include <stdio.h>
+
+int main() {
+    int matrix[3][3] = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+
+    int top = 0, bottom = 2, left = 0, right = 2;
+    int i;
+
+    printf("Spiral Matrix:\n");
+
+    while(top <= bottom && left <= right) {
+
+        for(i = left; i <= right; i++)
+            printf("%d ", matrix[top][i]);
+        top++;
+
+        for(i = top; i <= bottom; i++)
+            printf("%d ", matrix[i][right]);
+        right--;
+
+        if(top <= bottom) {
+            for(i = right; i >= left; i--)
+                printf("%d ", matrix[bottom][i]);
+            bottom--;
+        }
+
+        if(left <= right) {
+            for(i = bottom; i >= top; i--)
+                printf("%d ", matrix[i][left]);
+            left++;
+        }
+    }
+
+    return 0;
+}
+
+Day 14
+
+#include <stdio.h>
+
+int main() {
+    int matrix[3][3] = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+
+    int top = 0, bottom = 2, left = 0, right = 2;
+    int i;
+
+    printf("Spiral Matrix:\n");
+
+    while(top <= bottom && left <= right) {
+
+        for(i = left; i <= right; i++)
+            printf("%d ", matrix[top][i]);
+        top++;
+
+        for(i = top; i <= bottom; i++)
+            printf("%d ", matrix[i][right]);
+        right--;
+
+        if(top <= bottom) {
+            for(i = right; i >= left; i--)
+                printf("%d ", matrix[bottom][i]);
+            bottom--;
+        }
+
+        if(left <= right) {
+            for(i = bottom; i >= top; i--)
+                printf("%d ", matrix[i][left]);
+            left++;
+        }
+    }
+
+    return 0;
+}
+
+Day 15
+
+#include <stdio.h>
+
+int main() {
+    int matrix[3][3] = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+
+    int n = 3;
+    int i, j, temp;
+
+    for(i = 0; i < n; i++) {
+        for(j = i + 1; j < n; j++) {
+            temp = matrix[i][j];
+            matrix[i][j] = matrix[j][i];
+            matrix[j][i] = temp;
+        }
+    }
+
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < n / 2; j++) {
+            temp = matrix[i][j];
+            matrix[i][j] = matrix[i][n - j - 1];
+            matrix[i][n - j - 1] = temp;
+        }
+    }
+
+    printf("Rotated Image:\n");
+
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < n; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+
+Day 16
+
+#include <stdio.h>
+
+int main() {
+    int matrix[3][3] = {
+        {1, 1, 1},
+        {1, 0, 1},
+        {1, 1, 1}
+    };
+
+    int rows = 3, cols = 3;
+    int row[3] = {0}, col[3] = {0};
+    int i, j;
+
+    for(i = 0; i < rows; i++) {
+        for(j = 0; j < cols; j++) {
+            if(matrix[i][j] == 0) {
+                row[i] = 1;
+                col[j] = 1;
+            }
+        }
+    }
+
+    for(i = 0; i < rows; i++) {
+        for(j = 0; j < cols; j++) {
+            if(row[i] == 1 || col[j] == 1) {
+                matrix[i][j] = 0;
+            }
+        }
+    }
+
+    printf("Matrix after setting zeroes:\n");
+
+    for(i = 0; i < rows; i++) {
+        for(j = 0; j < cols; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+
+Day 17
+
+#include <stdio.h>
+
+int main() {
+    int arr[] = {1, 2, 3, 4, 5, 6, 7};
+    int n = 7;
+    int k = 3;
+    int temp[7];
+    int i;
+
+    for(i = 0; i < n; i++) {
+        temp[(i + k) % n] = arr[i];
+    }
+
+    for(i = 0; i < n; i++) {
+        arr[i] = temp[i];
+    }
+
+    printf("Rotated Array:\n");
+
+    for(i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+
+    return 0;
+}
+
+Day 18
+
+#include <stdio.h>
+
+int main() {
+    int arr[] = {-2, 1, -3, 4, -1, 2, 1, -5, 4};
+    int n = 9;
+    int i;
+    int maxSum = arr[0];
+    int currentSum = arr[0];
+
+    for(i = 1; i < n; i++) {
+        if(currentSum + arr[i] > arr[i])
+            currentSum = currentSum + arr[i];
+        else
+            currentSum = arr[i];
+
+        if(currentSum > maxSum)
+            maxSum = currentSum;
+    }
+
+    printf("Maximum Subarray Sum = %d", maxSum);
+
+    return 0;
+}
+
+Day 19
+
+
+
