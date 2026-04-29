@@ -271,7 +271,7 @@ int main() {
     return 0;
 }
 
-Day 12 
+Day 12
 
 #include <stdio.h>
 
@@ -355,48 +355,6 @@ int main() {
         {7, 8, 9}
     };
 
-    int top = 0, bottom = 2, left = 0, right = 2;
-    int i;
-
-    printf("Spiral Matrix:\n");
-
-    while(top <= bottom && left <= right) {
-
-        for(i = left; i <= right; i++)
-            printf("%d ", matrix[top][i]);
-        top++;
-
-        for(i = top; i <= bottom; i++)
-            printf("%d ", matrix[i][right]);
-        right--;
-
-        if(top <= bottom) {
-            for(i = right; i >= left; i--)
-                printf("%d ", matrix[bottom][i]);
-            bottom--;
-        }
-
-        if(left <= right) {
-            for(i = bottom; i >= top; i--)
-                printf("%d ", matrix[i][left]);
-            left++;
-        }
-    }
-
-    return 0;
-}
-
-Day 15
-
-#include <stdio.h>
-
-int main() {
-    int matrix[3][3] = {
-        {1, 2, 3},
-        {4, 5, 6},
-        {7, 8, 9}
-    };
-
     int n = 3;
     int i, j, temp;
 
@@ -428,7 +386,7 @@ int main() {
     return 0;
 }
 
-Day 16
+Day 15
 
 #include <stdio.h>
 
@@ -472,7 +430,7 @@ int main() {
     return 0;
 }
 
-Day 17
+Day 16
 
 #include <stdio.h>
 
@@ -500,7 +458,7 @@ int main() {
     return 0;
 }
 
-Day 18
+Day 17
 
 #include <stdio.h>
 
@@ -526,7 +484,7 @@ int main() {
     return 0;
 }
 
-Day 19
+Day 18
 
 #include <stdio.h>
 
@@ -555,7 +513,7 @@ int main() {
     return 0;
 }
 
-Day 20
+Day 19
 
 #include <stdio.h>
 
@@ -601,7 +559,7 @@ int main() {
     return 0;
 }
 
-Day 21
+Day 20
 
 #include <stdio.h>
 
@@ -625,7 +583,7 @@ int main() {
     return 0;
 }
 
-Day 22
+Day 21
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -665,31 +623,19 @@ int main() {
     return 0;
 }
 
+Day 22
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+int main() {
+
 Day 23
-
-#include <stdio.h>
-#include <stdlib.h>
-
-struct Node {
-    int data;
-    struct Node* next;
-};
-
-int main() {
-
-Day 24
-
-#include <stdio.h>
-#include <stdlib.h>
-
-struct Node {
-    int data;
-    struct Node* next;
-};
-
-int main() {
-
-Day 25
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -733,7 +679,7 @@ int main() {
     return 0;
 }
 
-Day 26
+Day 24
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -787,7 +733,7 @@ int main() {
     return 0;
 }
 
-Day 27
+Day 25
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -839,7 +785,7 @@ int main() {
     return 0;
 }
 
-Day 28
+Day 26
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -897,7 +843,7 @@ int main() {
     return 0;
 }
 
-Day 29
+Day 27
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -954,7 +900,7 @@ int main() {
     return 0;
 }
 
-Day 30
+Day 28
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1018,7 +964,7 @@ int main() {
     return 0;
 }
 
-Day 31
+Day 29
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1088,7 +1034,7 @@ int main() {
     return 0;
 }
 
-Day 32
+Day 30
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1166,8 +1112,83 @@ int main() {
     return 0;
 }
 
+Day 30#include <stdio.h>
+#include <stdlib.h>
 
-Day 33
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->next = NULL;
+    return newNode;
+}
+
+struct Node* reverse(struct Node* head) {
+    struct Node *prev = NULL, *nextNode;
+
+    while(head != NULL) {
+        nextNode = head->next;
+        head->next = prev;
+        prev = head;
+        head = nextNode;
+    }
+    return prev;
+}
+
+void printList(struct Node* head) {
+    while(head != NULL) {
+        printf("%d ", head->data);
+        head = head->next;
+    }
+}
+
+int main() {
+    struct Node *l1, *l2, *result = NULL, *temp, *tail = NULL;
+    int carry = 0, sum;
+
+    l1 = createNode(7);
+    l1->next = createNode(2);
+    l1->next->next = createNode(4);
+    l1->next->next->next = createNode(3);
+
+    l2 = createNode(5);
+    l2->next = createNode(6);
+    l2->next->next = createNode(4);
+
+    l1 = reverse(l1);
+    l2 = reverse(l2);
+
+    while(l1 != NULL || l2 != NULL || carry) {
+        sum = carry;
+
+        if(l1 != NULL) {
+            sum += l1->data;
+            l1 = l1->next;
+        }
+
+        if(l2 != NULL) {
+            sum += l2->data;
+            l2 = l2->next;
+        }
+
+        temp = createNode(sum % 10);
+        carry = sum / 10;
+
+        temp->next = result;
+        result = temp;
+    }
+
+    printf("Sum List:\n");
+    printList(result);
+
+    return 0;
+}
+
+Day 31
 
 #include <stdio.h>
 #include <string.h>
@@ -1214,7 +1235,7 @@ int main() {
     return 0;
 }
 
-Day 34
+Day 32
 
 #include <stdio.h>
 
@@ -1273,7 +1294,7 @@ int main() {
     return 0;
 }
 
-Day 35
+Day 33
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1328,7 +1349,7 @@ int main() {
     return 0;
 }
 
-Day 36
+Day 34
 
 #include <stdio.h>
 #include <ctype.h>
@@ -1374,7 +1395,7 @@ int main() {
     return 0;
 }
 
-Day 37
+Day 35
 
 #include <stdio.h>
 
@@ -1433,7 +1454,7 @@ int main() {
     return 0;
 }
 
-Day 38
+Day 36
 
 #include <stdio.h>
 
@@ -1551,7 +1572,7 @@ int main() {
     return 0;
 }
 
-Day 39
+Day 37
 
 #include <stdio.h>
 
@@ -1596,9 +1617,7 @@ int main() {
     return 0;
 }
 
-Day 40
-
-#include <stdio.h>
+Day 38#include <stdio.h>
 
 int main() {
     int nums[] = {1, 3, -1, -3, 5, 3, 6, 7};
@@ -1623,7 +1642,7 @@ int main() {
     return 0;
 }
 
-Day 41
+Day 39
 
 #include <stdio.h>
 
@@ -1655,7 +1674,7 @@ int main() {
     return 0;
 }
 
-Day 42
+Day 40
 
 #include <stdio.h>
 
@@ -1685,7 +1704,7 @@ int main() {
     return 0;
 }
 
-Day 43
+Day 41
 
 #include <stdio.h>
 
@@ -1724,7 +1743,7 @@ int main() {
     return 0;
 }
 
-Day 44
+Day 42
 
 #include <stdio.h>
 
@@ -1768,7 +1787,7 @@ int main() {
     return 0;
 }
 
-Day 45
+Day 43
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1805,7 +1824,7 @@ int main() {
     return 0;
 }
 
-Day 46
+Day 44
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1844,7 +1863,7 @@ int main() {
     return 0;
 }
 
-Day 47
+Day 45
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1887,7 +1906,7 @@ int main() {
     return 0;
 }
 
-Day 48
+Day 46
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1941,7 +1960,7 @@ int main() {
     return 0;
 }
 
-Day 48
+Day 47
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1982,7 +2001,7 @@ int main() {
     return 0;
 }
 
-Day 49
+Day 48
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2030,7 +2049,7 @@ int main() {
     return 0;
 }
 
-Day 50
+Day 49
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2085,62 +2104,7 @@ int main() {
     return 0;
 }
 
-Day 52
-
-#include <stdio.h>
-#include <stdlib.h>
-
-struct Node {
-    int data;
-    struct Node *left, *right;
-};
-
-struct Node* createNode(int val) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = val;
-    newNode->left = NULL;
-    newNode->right = NULL;
-    return newNode;
-}
-
-struct Node* insertBST(struct Node* root, int val) {
-    if(root == NULL)
-        return createNode(val);
-
-    if(val < root->data)
-        root->left = insertBST(root->left, val);
-    else
-        root->right = insertBST(root->right, val);
-
-    return root;
-}
-
-void inorder(struct Node* root) {
-    if(root != NULL) {
-        inorder(root->left);
-        printf("%d ", root->data);
-        inorder(root->right);
-    }
-}
-
-int main() {
-    struct Node* root = NULL;
-
-    int arr[] = {8, 3, 10, 1, 6, 14, 4, 7, 13};
-    int n = 9;
-    int i;
-
-    for(i = 0; i < n; i++) {
-        root = insertBST(root, arr[i]);
-    }
-
-    printf("BST Inorder Traversal:\n");
-    inorder(root);
-
-    return 0;
-}
-
-Day 53
+Day 50
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2203,7 +2167,7 @@ int main() {
     return 0;
 }
 
-Day 54
+Day 51
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2266,7 +2230,7 @@ int main() {
     return 0;
 }
 
-Day 55
+Day 52
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2323,64 +2287,7 @@ int main() {
     return 0;
 }
 
-Day 56
-
-#include <stdio.h>
-#include <stdlib.h>
-
-struct Node {
-    int data;
-    struct Node *left, *right;
-};
-
-struct Node* createNode(int val) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = val;
-    newNode->left = NULL;
-    newNode->right = NULL;
-    return newNode;
-}
-
-struct Node* LCA(struct Node* root, struct Node* p, struct Node* q) {
-    if(root == NULL)
-        return NULL;
-
-    if(root == p || root == q)
-        return root;
-
-    struct Node* left = LCA(root->left, p, q);
-    struct Node* right = LCA(root->right, p, q);
-
-    if(left != NULL && right != NULL)
-        return root;
-
-    if(left != NULL)
-        return left;
-    else
-        return right;
-}
-
-int main() {
-    struct Node* root = createNode(3);
-    root->left = createNode(5);
-    root->right = createNode(1);
-    root->left->left = createNode(6);
-    root->left->right = createNode(2);
-    root->right->left = createNode(0);
-    root->right->right = createNode(8);
-
-    struct Node* p = root->left;          // 5
-    struct Node* q = root->right;         // 1
-
-    struct Node* lca = LCA(root, p, q);
-
-    if(lca != NULL)
-        printf("LCA = %d\n", lca->data);
-
-    return 0;
-}
-
-Day 57
+Day 53
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2435,7 +2342,7 @@ int main() {
     return 0;
 }
 
-Day 58
+Day 54
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2506,7 +2413,7 @@ int main() {
     return 0;
 }
 
-Day 59
+Day 55
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2566,7 +2473,7 @@ int main() {
     return 0;
 }
 
-Day 60
+Day 56
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2620,7 +2527,7 @@ int main() {
     return 0;
 }
 
-Day 61
+Day 57
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2681,7 +2588,7 @@ int main() {
     return 0;
 }
 
-Day 62
+Day 58
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2748,7 +2655,7 @@ int main() {
     return 0;
 }
 
-Day 63
+Day 59
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2815,7 +2722,7 @@ int main() {
     return 0;
 }
 
-Day 64
+Day 60
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2875,7 +2782,7 @@ int main() {
     return 0;
 }
 
-Day 65
+Day 61
 
 #include <stdio.h>
 
@@ -2926,7 +2833,7 @@ int main() {
     return 0;
 }
 
-Day 66
+Day 62
 
 #include <stdio.h>
 
@@ -2981,7 +2888,7 @@ int main() {
     return 0;
 }
 
-Day 67
+Day 63
 
 #include <stdio.h>
 
@@ -3035,7 +2942,7 @@ int main() {
     return 0;
 }
 
-Day 68
+Day 64
 
 #include <stdio.h>
 
@@ -3114,9 +3021,9 @@ int main() {
         printf("Not all oranges rot\n");
 
     return 0;
-} 
+}
 
-Day 69
+Day 65
 
 #include <stdio.h>
 
@@ -3178,7 +3085,7 @@ int main() {
     return 0;
 }
 
-Day 70
+Day 66
 
 #include <stdio.h>
 
@@ -3244,7 +3151,7 @@ int main() {
     return 0;
 }
 
-Day 71
+Day 67
 
 #include <stdio.h>
 
@@ -3318,7 +3225,7 @@ int main() {
     return 0;
 }
 
-Day 72
+Day 68
 
 #include <stdio.h>
 
@@ -3380,7 +3287,7 @@ int main() {
     return 0;
 }
 
-Day 73
+Day 69
 
 #include <stdio.h>
 
@@ -3464,7 +3371,7 @@ int main() {
     return 0;
 }
 
-Day 74
+Day 70
 
 #include <stdio.h>
 
@@ -3527,70 +3434,7 @@ int main() {
     return 0;
 }
 
-Day 75
-
-#include <stdio.h>
-
-#define MAX 100
-#define INF 100000000
-
-int n = 4;
-int graph[MAX][MAX];
-
-int minCost = INF;
-
-void dfs(int src, int dst, int stops, int cost) {
-    if(cost >= minCost)
-        return;
-
-    if(src == dst) {
-        minCost = cost;
-        return;
-    }
-
-    if(stops < 0)
-        return;
-
-    for(int i = 0; i < n; i++) {
-        if(graph[src][i] != INF) {
-            dfs(i, dst, stops - 1, cost + graph[src][i]);
-        }
-    }
-}
-
-int main() {
-    int edges[5][3] = {
-        {0, 1, 100},
-        {1, 2, 100},
-        {0, 2, 500},
-        {2, 3, 100},
-        {1, 3, 600}
-    };
-
-    for(int i = 0; i < n; i++)
-        for(int j = 0; j < n; j++)
-            graph[i][j] = INF;
-
-    for(int i = 0; i < 5; i++) {
-        int u = edges[i][0];
-        int v = edges[i][1];
-        int w = edges[i][2];
-        graph[u][v] = w;
-    }
-
-    int src = 0, dst = 3, K = 1;
-
-    dfs(src, dst, K, 0);
-
-    if(minCost == INF)
-        printf("No route within %d stops\n", K);
-    else
-        printf("Cheapest Price = %d\n", minCost);
-
-    return 0;
-}
-
-Day 76
+Day 71
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -3681,7 +3525,7 @@ int main() {
     return 0;
 }
 
-Day 77
+Day 72
 
 #include <stdio.h>
 
@@ -3734,7 +3578,7 @@ int main() {
     return 0;
 }
 
-Day 78
+Day 73
 
 #include <stdio.h>
 
@@ -3785,7 +3629,7 @@ int main() {
     return 0;
 }
 
-Day 79
+Day 74
 
 #include <stdio.h>
 
@@ -3840,7 +3684,7 @@ int main() {
     return 0;
 }
 
-Day 80
+Day 75
 
 #include <stdio.h>
 
@@ -3912,7 +3756,7 @@ int main() {
     return 0;
 }
 
-Day 81
+Day 76
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -3976,7 +3820,7 @@ int main() {
     return 0;
 }
 
-Day 82
+Day 77
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -4050,7 +3894,7 @@ int main() {
     return 0;
 }
 
-Day 83
+Day 78
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -4140,7 +3984,7 @@ int main() {
     return 0;
 }
 
-Day 84
+Day 79
 
 #include <stdio.h>
 
@@ -4236,7 +4080,7 @@ int main() {
     return 0;
 }
 
-Day 85
+Day 80
 
 #include <stdio.h>
 
@@ -4309,7 +4153,7 @@ int main() {
     return 0;
 }
 
-Day 86
+Day 81
 
 #include <stdio.h>
 
@@ -4345,8 +4189,7 @@ int main() {
 
     return 0;
 }
-
-Day 87
+Day 82
 
 #include <stdio.h>
 
@@ -4381,7 +4224,7 @@ int main() {
     return 0;
 }
 
-Day 88
+Day 83
 
 #include <stdio.h>
 
@@ -4428,18 +4271,146 @@ int main() {
     return 0;
 }
 
-Day 89
+Day 84
+
+#include <stdio.h>
+
+int findPeak(int arr[], int n) {
+    int low = 0, high = n - 1;
+
+    while(low < high) {
+        int mid = low + (high - low) / 2;
+
+        if(arr[mid] < arr[mid + 1])
+            low = mid + 1;
+        else
+            high = mid;
+    }
+
+    return low;
+}
+
+int main() {
+    int arr[] = {1, 2, 3, 1};
+    int n = 4;
+
+    int peakIndex = findPeak(arr, n);
+
+    printf("Peak Element = %d at index %d\n", arr[peakIndex], peakIndex);
+
+    return 0;
+}
+
+Day 85
+
+#include <stdio.h>
+
+int findMin(int arr[], int n) {
+    int low = 0, high = n - 1;
+
+    while(low < high) {
+        int mid = low + (high - low) / 2;
+
+        if(arr[mid] > arr[high])
+            low = mid + 1;
+        else
+            high = mid;
+    }
+
+    return arr[low];
+}
+
+int main() {
+    int arr[] = {4, 5, 6, 7, 0, 1, 2};
+    int n = 7;
+
+    printf("Minimum element = %d\n", findMin(arr, n));
+
+    return 0;
+}
 
 
+Day 86#include <stdio.h>
+
+int mySqrt(int x) {
+    long long low = 0, high = x, ans = 0;
+
+    while(low <= high) {
+        long long mid = low + (high - low) / 2;
+        long long sq = mid * mid;
+
+        if(sq == x)
+            return mid;
+
+        if(sq < x) {
+            ans = mid;
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    int x = 17;
+
+    printf("Square root (floor) = %d\n", mySqrt(x));
+
+    return 0;
+}
 
 
+Day 87
 
+#include <stdio.h>
 
+int canEatAll(int piles[], int n, int h, int k) {
+    long long hours = 0;
 
+    for(int i = 0; i < n; i++) {
+        hours += piles[i] / k;
+        if(piles[i] % k != 0)
+            hours++;
+    }
 
+    return hours <= h;
+}
 
+int minEatingSpeed(int piles[], int n, int h) {
+    int low = 1, high = 0;
 
+    for(int i = 0; i < n; i++) {
+        if(piles[i] > high)
+            high = piles[i];
+    }
 
+    int ans = high;
+
+    while(low <= high) {
+        int mid = low + (high - low) / 2;
+
+        if(canEatAll(piles, n, h, mid)) {
+            ans = mid;
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    int piles[] = {3, 6, 7, 11};
+    int n = 4;
+    int h = 8;
+
+    printf("Minimum eating speed = %d\n", minEatingSpeed(piles, n, h));
+
+    return 0;
+}
 
 
 
