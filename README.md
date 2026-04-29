@@ -2205,6 +2205,425 @@ int main() {
 
 Day 54
 
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* insertBST(struct Node* root, int val) {
+    if(root == NULL)
+        return createNode(val);
+
+    if(val < root->data)
+        root->left = insertBST(root->left, val);
+    else
+        root->right = insertBST(root->right, val);
+
+    return root;
+}
+
+struct Node* LCA(struct Node* root, int p, int q) {
+    if(root == NULL)
+        return NULL;
+
+    if(p < root->data && q < root->data)
+        return LCA(root->left, p, q);
+
+    if(p > root->data && q > root->data)
+        return LCA(root->right, p, q);
+
+    return root;
+}
+
+int main() {
+    struct Node* root = NULL;
+
+    int arr[] = {6, 2, 8, 0, 4, 7, 9, 3, 5};
+    int n = 9, i;
+
+    for(i = 0; i < n; i++) {
+        root = insertBST(root, arr[i]);
+    }
+
+    int p = 2, q = 8;
+
+    struct Node* lca = LCA(root, p, q);
+
+    if(lca != NULL)
+        printf("LCA of %d and %d = %d\n", p, q, lca->data);
+
+    return 0;
+}
+
+Day 55
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* LCA(struct Node* root, struct Node* p, struct Node* q) {
+    if(root == NULL)
+        return NULL;
+
+    if(root == p || root == q)
+        return root;
+
+    struct Node* left = LCA(root->left, p, q);
+    struct Node* right = LCA(root->right, p, q);
+
+    if(left != NULL && right != NULL)
+        return root;
+
+    if(left != NULL)
+        return left;
+    else
+        return right;
+}
+
+int main() {
+    struct Node* root = createNode(3);
+    root->left = createNode(5);
+    root->right = createNode(1);
+    root->left->left = createNode(6);
+    root->left->right = createNode(2);
+    root->right->left = createNode(0);
+    root->right->right = createNode(8);
+
+    struct Node* p = root->left;          // 5
+    struct Node* q = root->right;         // 1
+
+    struct Node* lca = LCA(root, p, q);
+
+    if(lca != NULL)
+        printf("LCA = %d\n", lca->data);
+
+    return 0;
+}
+
+Day 56
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+struct Node* LCA(struct Node* root, struct Node* p, struct Node* q) {
+    if(root == NULL)
+        return NULL;
+
+    if(root == p || root == q)
+        return root;
+
+    struct Node* left = LCA(root->left, p, q);
+    struct Node* right = LCA(root->right, p, q);
+
+    if(left != NULL && right != NULL)
+        return root;
+
+    if(left != NULL)
+        return left;
+    else
+        return right;
+}
+
+int main() {
+    struct Node* root = createNode(3);
+    root->left = createNode(5);
+    root->right = createNode(1);
+    root->left->left = createNode(6);
+    root->left->right = createNode(2);
+    root->right->left = createNode(0);
+    root->right->right = createNode(8);
+
+    struct Node* p = root->left;          // 5
+    struct Node* q = root->right;         // 1
+
+    struct Node* lca = LCA(root, p, q);
+
+    if(lca != NULL)
+        printf("LCA = %d\n", lca->data);
+
+    return 0;
+}
+
+Day 57
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+void levelOrder(struct Node* root) {
+    if(root == NULL) return;
+
+    struct Node* queue[MAX];
+    int front = 0, rear = 0;
+
+    queue[rear++] = root;
+
+    while(front < rear) {
+        struct Node* curr = queue[front++];
+        printf("%d ", curr->data);
+
+        if(curr->left)
+            queue[rear++] = curr->left;
+
+        if(curr->right)
+            queue[rear++] = curr->right;
+    }
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(3);
+    root->left->left = createNode(4);
+    root->left->right = createNode(5);
+    root->right->left = createNode(6);
+    root->right->right = createNode(7);
+
+    printf("Level Order Traversal:\n");
+    levelOrder(root);
+
+    return 0;
+}
+
+Day 58
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+void zigzagLevelOrder(struct Node* root) {
+    if(root == NULL) return;
+
+    struct Node* queue[MAX];
+    int front = 0, rear = 0;
+    int level = 0;
+
+    queue[rear++] = root;
+
+    while(front < rear) {
+        int size = rear - front;
+        int arr[MAX];
+
+        for(int i = 0; i < size; i++) {
+            struct Node* curr = queue[front++];
+            arr[i] = curr->data;
+
+            if(curr->left)
+                queue[rear++] = curr->left;
+
+            if(curr->right)
+                queue[rear++] = curr->right;
+        }
+
+        if(level % 2 == 0) {
+            for(int i = 0; i < size; i++)
+                printf("%d ", arr[i]);
+        } else {
+            for(int i = size - 1; i >= 0; i--)
+                printf("%d ", arr[i]);
+        }
+
+        level++;
+    }
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(3);
+    root->left->left = createNode(4);
+    root->left->right = createNode(5);
+    root->right->left = createNode(6);
+    root->right->right = createNode(7);
+
+    printf("Zigzag Level Order Traversal:\n");
+    zigzagLevelOrder(root);
+
+    return 0;
+}
+
+Day 59
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+void rightSideView(struct Node* root) {
+    if(root == NULL) return;
+
+    struct Node* queue[MAX];
+    int front = 0, rear = 0;
+
+    queue[rear++] = root;
+
+    while(front < rear) {
+        int size = rear - front;
+
+        for(int i = 0; i < size; i++) {
+            struct Node* curr = queue[front++];
+
+            // last node of this level
+            if(i == size - 1)
+                printf("%d ", curr->data);
+
+            if(curr->left)
+                queue[rear++] = curr->left;
+
+            if(curr->right)
+                queue[rear++] = curr->right;
+        }
+    }
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(3);
+    root->left->right = createNode(5);
+    root->right->right = createNode(4);
+
+    printf("Right Side View:\n");
+    rightSideView(root);
+
+    return 0;
+}
+
+Day 60
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int isMirror(struct Node* t1, struct Node* t2) {
+    if(t1 == NULL && t2 == NULL)
+        return 1;
+
+    if(t1 == NULL || t2 == NULL)
+        return 0;
+
+    return (t1->data == t2->data) &&
+           isMirror(t1->left, t2->right) &&
+           isMirror(t1->right, t2->left);
+}
+
+int isSymmetric(struct Node* root) {
+    if(root == NULL)
+        return 1;
+
+    return isMirror(root->left, root->right);
+}
+
+int main() {
+    struct Node* root = createNode(1);
+    root->left = createNode(2);
+    root->right = createNode(2);
+    root->left->left = createNode(3);
+    root->left->right = createNode(4);
+    root->right->left = createNode(4);
+    root->right->right = createNode(3);
+
+    if(isSymmetric(root))
+        printf("Tree is Symmetric");
+    else
+        printf("Tree is Not Symmetric");
+
+    return 0;
+}
+
+Day 61
+
+
+
 
 
 
