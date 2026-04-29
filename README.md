@@ -3914,6 +3914,524 @@ int main() {
 
 Day 81
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+struct Node {
+    int val;
+    int neighbors[MAX];
+    int size;
+};
+
+struct Node* clone[MAX];
+int visited[MAX];
+
+struct Node* createNode(int val) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->val = val;
+    newNode->size = 0;
+    return newNode;
+}
+
+void dfs(struct Node* node) {
+    if(node == NULL) return;
+
+    visited[node->val] = 1;
+
+    if(clone[node->val] == NULL)
+        clone[node->val] = createNode(node->val);
+
+    for(int i = 0; i < node->size; i++) {
+        int nei = node->neighbors[i];
+
+        if(clone[nei] == NULL)
+            clone[nei] = createNode(nei);
+
+        clone[node->val]->neighbors[clone[node->val]->size++] = nei;
+
+        if(!visited[nei]) {
+            dfs(clone[nei]);
+        }
+    }
+}
+
+int main() {
+    struct Node* node0 = createNode(0);
+    struct Node* node1 = createNode(1);
+    struct Node* node2 = createNode(2);
+
+    node0->neighbors[node0->size++] = 1;
+    node0->neighbors[node0->size++] = 2;
+
+    node1->neighbors[node1->size++] = 0;
+
+    node2->neighbors[node2->size++] = 0;
+
+    dfs(node0);
+
+    printf("Graph cloned successfully\n");
+
+    return 0;
+}
+
+Day 82
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int visited[MAX];
+int disc[MAX], low[MAX];
+int parent[MAX];
+int n;
+int timer = 0;
+
+void dfs(int u) {
+    visited[u] = 1;
+    disc[u] = low[u] = ++timer;
+
+    for(int v = 0; v < n; v++) {
+        if(graph[u][v]) {
+
+            if(!visited[v]) {
+                parent[v] = u;
+
+                dfs(v);
+
+                if(low[v] < low[u])
+                    low[u] = low[v];
+
+                // Bridge condition
+                if(low[v] > disc[u]) {
+                    printf("Critical Connection: %d - %d\n", u, v);
+                }
+            }
+            else if(v != parent[u]) {
+                if(disc[v] < low[u])
+                    low[u] = disc[v];
+            }
+        }
+    }
+}
+
+int main() {
+    n = 5;
+
+    int edges[5][2] = {
+        {0, 1},
+        {1, 2},
+        {2, 0},
+        {1, 3},
+        {3, 4}
+    };
+
+    for(int i = 0; i < n; i++) {
+        visited[i] = 0;
+        parent[i] = -1;
+    }
+
+    for(int i = 0; i < 5; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        graph[u][v] = 1;
+        graph[v][u] = 1;
+    }
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            dfs(i);
+        }
+    }
+
+    return 0;
+}
+
+Day 83
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int visited[MAX];
+int disc[MAX], low[MAX];
+int parent[MAX];
+int isAP[MAX];
+
+int n;
+int timer = 0;
+
+void dfs(int u) {
+    visited[u] = 1;
+    disc[u] = low[u] = ++timer;
+
+    int children = 0;
+
+    for(int v = 0; v < n; v++) {
+        if(graph[u][v]) {
+
+            if(!visited[v]) {
+                children++;
+                parent[v] = u;
+
+                dfs(v);
+
+                if(low[v] < low[u])
+                    low[u] = low[v];
+
+                // articulation point condition (non-root)
+                if(parent[u] != -1 && low[v] >= disc[u])
+                    isAP[u] = 1;
+            }
+            else if(v != parent[u]) {
+                if(disc[v] < low[u])
+                    low[u] = disc[v];
+            }
+        }
+    }
+
+    // root condition
+    if(parent[u] == -1 && children > 1)
+        isAP[u] = 1;
+}
+
+int main() {
+    n = 5;
+
+    int edges[5][2] = {
+        {0, 1},
+        {1, 2},
+        {2, 0},
+        {1, 3},
+        {3, 4}
+    };
+
+    for(int i = 0; i < n; i++) {
+        visited[i] = 0;
+        parent[i] = -1;
+        isAP[i] = 0;
+    }
+
+    for(int i = 0; i < 5; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        graph[u][v] = 1;
+        graph[v][u] = 1;
+    }
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            dfs(i);
+        }
+    }
+
+    printf("Articulation Points:\n");
+
+    for(int i = 0; i < n; i++) {
+        if(isAP[i])
+            printf("%d ", i);
+    }
+
+    return 0;
+}
+
+Day 84
+
+#include <stdio.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+int transpose[MAX][MAX];
+int visited[MAX];
+int stack[MAX];
+int top = -1;
+int n;
+
+void dfs1(int v) {
+    visited[v] = 1;
+
+    for(int i = 0; i < n; i++) {
+        if(graph[v][i] && !visited[i]) {
+            dfs1(i);
+        }
+    }
+
+    stack[++top] = v;
+}
+
+void dfs2(int v) {
+    visited[v] = 1;
+    printf("%d ", v);
+
+    for(int i = 0; i < n; i++) {
+        if(transpose[v][i] && !visited[i]) {
+            dfs2(i);
+        }
+    }
+}
+
+int main() {
+    n = 5;
+
+    int edges[6][2] = {
+        {0, 2},
+        {2, 1},
+        {1, 0},
+        {0, 3},
+        {3, 4},
+        {4, 3}
+    };
+
+    // initialize matrices
+    for(int i = 0; i < n; i++) {
+        visited[i] = 0;
+        for(int j = 0; j < n; j++) {
+            graph[i][j] = 0;
+            transpose[i][j] = 0;
+        }
+    }
+
+    for(int i = 0; i < 6; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        graph[u][v] = 1;
+    }
+
+    // step 1: fill order stack
+    for(int i = 0; i < n; i++) {
+        if(!visited[i])
+            dfs1(i);
+    }
+
+    // step 2: transpose graph
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            if(graph[i][j])
+                transpose[j][i] = 1;
+        }
+    }
+
+    // reset visited
+    for(int i = 0; i < n; i++)
+        visited[i] = 0;
+
+    printf("Strongly Connected Components:\n");
+
+    // step 3: process stack
+    while(top != -1) {
+        int v = stack[top--];
+
+        if(!visited[v]) {
+            dfs2(v);
+            printf("\n");
+        }
+    }
+
+    return 0;
+}
+
+Day 85
+
+#include <stdio.h>
+
+#define MAX 100
+#define INF 100000000
+
+int dist[MAX][MAX];
+int n;
+
+int main() {
+    n = 4;
+
+    int edges[4][3] = {
+        {0, 1, 3},
+        {1, 2, 1},
+        {1, 3, 4},
+        {2, 3, 1}
+    };
+
+    // initialize distance matrix
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            if(i == j)
+                dist[i][j] = 0;
+            else
+                dist[i][j] = INF;
+        }
+    }
+
+    for(int i = 0; i < 4; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int w = edges[i][2];
+
+        dist[u][v] = w;
+        dist[v][u] = w;
+    }
+
+    // Floyd Warshall
+    for(int k = 0; k < n; k++) {
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++) {
+                if(dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+
+    int threshold = 4;
+    int bestCity = -1;
+    int minReachable = INF;
+
+    for(int i = 0; i < n; i++) {
+        int count = 0;
+
+        for(int j = 0; j < n; j++) {
+            if(i != j && dist[i][j] <= threshold)
+                count++;
+        }
+
+        if(count <= minReachable) {
+            minReachable = count;
+            bestCity = i;
+        }
+    }
+
+    printf("City with smallest number of neighbors = %d\n", bestCity);
+
+    return 0;
+}
+
+Day 86
+
+#include <stdio.h>
+
+int binarySearch(int arr[], int n, int target) {
+    int low = 0, high = n - 1;
+
+    while(low <= high) {
+        int mid = low + (high - low) / 2;
+
+        if(arr[mid] == target)
+            return mid;
+
+        if(arr[mid] < target)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
+    return -1;
+}
+
+int main() {
+    int arr[] = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+    int n = 10;
+    int target = 23;
+
+    int result = binarySearch(arr, n, target);
+
+    if(result != -1)
+        printf("Element found at index %d\n", result);
+    else
+        printf("Element not found\n");
+
+    return 0;
+}
+
+Day 87
+
+#include <stdio.h>
+
+int searchInsert(int arr[], int n, int target) {
+    int low = 0, high = n - 1;
+
+    while(low <= high) {
+        int mid = low + (high - low) / 2;
+
+        if(arr[mid] == target)
+            return mid;
+
+        if(arr[mid] < target)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
+    return low; // correct insert position
+}
+
+int main() {
+    int arr[] = {1, 3, 5, 6};
+    int n = 4;
+    int target = 5;
+
+    printf("Insert Position = %d\n", searchInsert(arr, n, target));
+
+    target = 2;
+    printf("Insert Position = %d\n", searchInsert(arr, n, target));
+
+    return 0;
+}
+
+Day 88
+
+#include <stdio.h>
+
+int search(int arr[], int n, int target) {
+    int low = 0, high = n - 1;
+
+    while(low <= high) {
+        int mid = low + (high - low) / 2;
+
+        if(arr[mid] == target)
+            return mid;
+
+        // left half sorted
+        if(arr[low] <= arr[mid]) {
+            if(target >= arr[low] && target < arr[mid])
+                high = mid - 1;
+            else
+                low = mid + 1;
+        }
+        // right half sorted
+        else {
+            if(target > arr[mid] && target <= arr[high])
+                low = mid + 1;
+            else
+                high = mid - 1;
+        }
+    }
+
+    return -1;
+}
+
+int main() {
+    int arr[] = {4, 5, 6, 7, 0, 1, 2};
+    int n = 7;
+    int target = 0;
+
+    int res = search(arr, n, target);
+
+    if(res != -1)
+        printf("Element found at index %d\n", res);
+    else
+        printf("Element not found\n");
+
+    return 0;
+}
+
+Day 89
+
+
+
 
 
 
