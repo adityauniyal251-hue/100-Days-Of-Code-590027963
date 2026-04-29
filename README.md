@@ -528,5 +528,106 @@ int main() {
 
 Day 19
 
+#include <stdio.h>
+
+int main() {
+    int nums[] = {1, 2, 3, 4};
+    int n = 4;
+    int result[4];
+    int i;
+
+    result[0] = 1;
+    for(i = 1; i < n; i++) {
+        result[i] = result[i - 1] * nums[i - 1];
+    }
+
+    int right = 1;
+    for(i = n - 1; i >= 0; i--) {
+        result[i] = result[i] * right;
+        right = right * nums[i];
+    }
+
+    printf("Product of Array Except Self:\n");
+    for(i = 0; i < n; i++) {
+        printf("%d ", result[i]);
+    }
+
+    return 0;
+}
+
+Day 20
+
+#include <stdio.h>
+
+int main() {
+    int arr[] = {1, -2, 3, -2};
+    int n = 4;
+    int i;
+
+    int total = arr[0];
+    int maxSum = arr[0], curMax = arr[0];
+    int minSum = arr[0], curMin = arr[0];
+
+    for(i = 1; i < n; i++) {
+        if(curMax + arr[i] > arr[i])
+            curMax = curMax + arr[i];
+        else
+            curMax = arr[i];
+
+        if(curMax > maxSum)
+            maxSum = curMax;
+
+        if(curMin + arr[i] < arr[i])
+            curMin = curMin + arr[i];
+        else
+            curMin = arr[i];
+
+        if(curMin < minSum)
+            minSum = curMin;
+
+        total += arr[i];
+    }
+
+    if(maxSum < 0)
+        printf("Maximum Circular Subarray Sum = %d", maxSum);
+    else {
+        int circularSum = total - minSum;
+        if(circularSum > maxSum)
+            printf("Maximum Circular Subarray Sum = %d", circularSum);
+        else
+            printf("Maximum Circular Subarray Sum = %d", maxSum);
+    }
+
+    return 0;
+}
+
+Day 21
+
+#include <stdio.h>
+
+int main() {
+    int arr[] = {-1, 0, 1, 2, -1, -4};
+    int n = 6;
+    int i, j, k;
+
+    printf("Triplets with sum 0:\n");
+
+    for(i = 0; i < n - 2; i++) {
+        for(j = i + 1; j < n - 1; j++) {
+            for(k = j + 1; k < n; k++) {
+                if(arr[i] + arr[j] + arr[k] == 0) {
+                    printf("%d %d %d\n", arr[i], arr[j], arr[k]);
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+Day 22
+
+
+
 
 
