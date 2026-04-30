@@ -34,7 +34,7 @@ int main() {
         profit = prices[i] - minPrice;
 
         if(profit > maxProfit) {
-            maxProfit = profit;
+            maxProfit = profit; 
         }
     }
 
